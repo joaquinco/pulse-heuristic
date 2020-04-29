@@ -1,6 +1,6 @@
 
 
 class Context(dict):
-  def __getattribute__(self, name):
+  def __getattr__(self, name):
     return self.get(name, None)
 

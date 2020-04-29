@@ -1,5 +1,6 @@
 from functools import partial
 
+
 def _get_key(key, elem):
   """
   Return the sorting key of elem
@@ -9,7 +10,7 @@ def _get_key(key, elem):
 
   if isinstance(key, str):
     return getattr(elem, key)
-  
+
   if hasattr(key, '__call__'):
     return key(elem)
 
@@ -23,41 +24,58 @@ class Node(object):
     self.parent = None
 
   def insert(self, node):
-    if self.key <= node.key:
+    if node.key <= self.key:
       if self.left:
         return self.left.insert(node)
       self.left = node
-      node.parent = self
     else:
       if self.right:
         return self.right.insert(node)
       self.right = node
-      node.parent = self
+
+    node.parent = self
   
   def remove(self):
     if self.left:
       raise Exception('Can\'t remove intermediate element')
 
+    ret = None
+
     if self.right:
-      self.parent.left = self.right
+      ret = self.right
+      if self.parent:
+        self.parent.left = self.right
+        self.right.parent = self.parent
+    elif self.parent:
+      ret = self.parent
+      self.parent.left = None
 
     self.parent = None
     self.right = None
     self.elem = None
     self.key = None
 
+    return ret
+
+  def __repr__(self):
+    return f'<Node key={self.key} elem={self.elem}>'
+
 
 class BinaryTree(object):
-  def __init__(self, iterable, key=None):
+  def __init__(self, iterable=None, key=None):
     self.root = None
     self.first = None
     self.length = 0
     self.get_key = partial(_get_key, key)
 
-    for elem in iterable:
+    for elem in iterable or []:
       self.add(elem)
 
-  def add(self, elem):
+  def add(self, *args):
+    for elem in args:
+      self._add_elem(elem)
+  
+  def _add_elem(self, elem):
     node = Node(elem, self.get_key(elem))
     self._perform_insertion(node)
     self.length += 1
@@ -66,10 +84,10 @@ class BinaryTree(object):
     """
     Perform sorted insertion of node in the sorted tree.
     """
-
     if not self.root:
       self.root = node
       self.first = node
+
       return
 
     self.root.insert(node)
@@ -78,19 +96,17 @@ class BinaryTree(object):
     if node.key <= self.first.key:
       self.first = node
 
-    return self
-
   def pop(self):
     """
     Pops the lower element from the tree
     """
     ret = self.first.elem
 
-    if self.root == self.first:
-      self.root = None
-      self.first = None
-    else:
-      self.first.remove()
+    reassign_root = self.root == self.first
+    self.first = self.first.remove()
+
+    if reassign_root:
+      self.root = self.first
 
     self.length -= 1
 
@@ -98,7 +114,3 @@ class BinaryTree(object):
 
   def __len__(self):
     return self.length
-
-
-
-

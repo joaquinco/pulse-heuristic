@@ -5,6 +5,8 @@ infinite = 1 << 32
 class PulseContext(Context):
   def __init__(
         self,
+        source=None,
+        target=None,
         weight=None,
         constraints=None,
         resource_bounds=None,
@@ -14,6 +16,8 @@ class PulseContext(Context):
       ):
     super().__init__(**kwargs)
     
+    self.source = source
+    self.target = target
     self.cost_weight = weight
     self.constraints = constraints
     self.resource_bounds = resource_bounds
@@ -28,6 +32,8 @@ class PulseContext(Context):
     """
 
     for name, value in self.constraints.items():
+      if name == self.cost_weight:
+        continue
       if pulse.weights[name] + self.resource_bounds[name][pulse.node] > value:
         return True
     
@@ -56,13 +62,14 @@ class PulseContext(Context):
     for other_pulse in node_pulses:
       if pulse.dominates(other_pulse):
         to_remove.add(other_pulse)
-    
-    node_pulses.add(pulse)
+
     node_pulses -= to_remove
+    node_pulses.add(pulse)
 
     # Update best cost if needed
+    is_target = self.target == pulse.node
     pulse_cost = pulse.weights[self.cost_weight]
-    if pulse_cost < self.best_cost and not self.best_cost_fixed:
+    if is_target and pulse_cost < self.best_cost and not self.best_cost_fixed:
       self.best_cost = pulse_cost
 
     self.pulses_by_node[pulse.node] = node_pulses

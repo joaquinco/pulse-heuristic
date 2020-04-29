@@ -1,5 +1,7 @@
 from functools import partial
 
+import pdb
+
 import networkx as nx
 from .pulse import Pulse
 from ..sorted import BinaryTree
@@ -12,13 +14,14 @@ def _initialize_pulse(
   Initialization phase of pulse algorithm
   """
 
-  empty_weights = { k: 0 for k, _ in graph.nodes(source).values() }
+  some_edge = list(nx.edges(graph, source))[0]
+  empty_weights = { k: 0 for k in graph.edges[some_edge].keys() }
   
   # Pulses over which we'll iterate
   pulses = BinaryTree([Pulse(source, empty_weights)], key=lambda p: p.weights[weight])
 
   # For cost pruning
-  reverse_graph = graph.reverse_view()
+  reverse_graph = nx.reverse_view(graph)
   cost_bound_by_node = nx.single_source_dijkstra_path_length(
     reverse_graph, target, weight=weight
   )
@@ -31,9 +34,11 @@ def _initialize_pulse(
     )
 
   context = PulseContext(
+    source=source,
+    target=target,
     weight=weight,
     pulses=pulses,
-    cost_bound_by_node=cost_bound_by_node,
+    cost_bound=cost_bound_by_node,
     best_cost=primal_bound,
     constraints=constraints,
     resource_bounds=resource_bounds,
@@ -42,12 +47,21 @@ def _initialize_pulse(
   return context
 
 
-
 def pulse(graph, *args, **kwargs):
   """
-  Computes shortest path using pulse algorithm
-  """
+  Compute shortest path using pulse algorithm
 
+  Args:
+    graph: networkx graph instance
+    source: source node
+    target: target node
+    weight: edge weight to minimize, default 'weight'
+    constraints: dict of constraints, default None
+    primal_bound: path cost between source and target used to bound branches.
+
+  Returns:
+    generator that yields path, path_weights
+  """
   if not graph:
     raise Exception('Graph is empty')
 
@@ -59,8 +73,8 @@ def pulse(graph, *args, **kwargs):
 
     current = context.pulses.pop()
 
-    for adjacent in graph.adj[current.node]:
-      candidate_pulse = Pulse.from_pulse(current, adjacent, graph.nodes[adjacent])
+    for adjacent, edge_weights in graph.adj[current.node].items():
+      candidate_pulse = Pulse.from_pulse(current, adjacent, edge_weights)
 
       # Cost pruning
       if not context.satisfies_cost(candidate_pulse):
@@ -77,9 +91,6 @@ def pulse(graph, *args, **kwargs):
       context.save_pulse(candidate_pulse)
       context.pulses.add(candidate_pulse)
 
-      # TODO: if adjacent is target node then yield the full path.
-
-
-
-
+      if adjacent == context.target:
+        yield candidate_pulse.to_path(), dict(candidate_pulse.weights)
 

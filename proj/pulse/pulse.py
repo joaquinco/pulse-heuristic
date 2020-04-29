@@ -15,10 +15,22 @@ class Pulse(object):
         [other_pulse.weights[k] for k in keys]
     )
     
-    # self is strictly better, or it's no better no worse
-    return all(map(lambda x: x[0] <= x[1], to_compare)) or \
-           not (any(map(lambda x: x[0] > x[1], to_compare)) and \
-           any(map(lambda x: x[0] < x[1], to_compare)))
+    # all weights from self are greater or equal and there exists
+    # one that is greater
+    return all(map(lambda x: x[0] <= x[1], to_compare)) and \
+           any(map(lambda x: x[0] < x[1], to_compare))
+
+  def to_path(self):
+    curr = self
+    path = []
+
+    while curr:
+      path.append(curr.node)
+      curr = curr.prev_pulse
+
+    path.reverse()
+
+    return path
 
   @classmethod
   def from_pulse(cls, pulse, node, weights):
@@ -26,6 +38,9 @@ class Pulse(object):
     ret.prev_pulse = pulse
 
     for key, value in weights.items():
-      ret.weights = pulse.weights[key] + value
+      ret.weights[key] = pulse.weights[key] + value
 
     return ret
+
+  def __repr__(self):
+    return f'<Pulse node={self.node} weights={self.weights}>'
