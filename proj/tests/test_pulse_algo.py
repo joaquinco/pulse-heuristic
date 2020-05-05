@@ -11,10 +11,13 @@ class TestPulseAlgorithm(unittest.TestCase):
     self.source = 's'
     self.target = 't'
 
-  def get_pulse_generator(self):
+  def get_pulse_generator(self, **kwargs):
     return pulse(
       self.graph, self.source, self.target,
-      weight='cost', constraints=self.constraints, primal_bound=20,
+      **{
+        **dict(weight='cost', constraints=self.constraints, primal_bound=20),
+        **kwargs,
+      }
     )
 
   def test_runs_ok(self):
@@ -40,3 +43,9 @@ class TestPulseAlgorithm(unittest.TestCase):
 
     # 2 is the known number of paths from s to t
     self.assertEqual(len(results), 2)
+
+  def test_best_results_found(self):
+    # 8 is the known shortest path cost and is satisfied by a single path
+    results = [r for r in self.get_pulse_generator(primal_bound=8)]
+
+    self.assertEqual(len(results), 1)

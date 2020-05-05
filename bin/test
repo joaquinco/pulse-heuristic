@@ -1,4 +1,10 @@
 #!/bin/bash
 
-python -m unittest proj/tests/test_*
+args=$*
+
+if [ -z $args ]; then
+  args=proj/tests/test_*
+fi
+
+python -m unittest $args
 

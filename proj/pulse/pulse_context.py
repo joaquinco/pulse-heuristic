@@ -1,5 +1,5 @@
-from ..context import Context
 from proj.constants import infinite
+from ..context import Context
 
 class PulseContext(Context):
   def __init__(

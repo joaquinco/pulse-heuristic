@@ -21,21 +21,27 @@ def run_solve_search(ctx, od_index):
   """
   Run recursive algorithm saving best results on the leafs.
   """
+  if od_index >= len(ctx.odpairs):
+    ctx.recompute_objective()
+
   od = ctx.odpairs[od_index]
   source, target = od
 
+  constraints = dict(
+    cost=ctx.get_budget(od),
+  )
+
   paths = pulse(
-    ctx.current_graph, source, target, weight='weight',
+    ctx.current_graph, source, target,
+    weight='weight', constraints=constraints,
     primal_bound=ctx.base_primal_bound[od] * configuration.pulse_primal_bound_factor
   )
 
   for path in paths:
-    ctx.apply_path(path)
-    if od_index == len(ctx.odpairs) - 1:
-      ctx.compute_objective()
-    else:
-      run_solve_search(ctx, od_index + 1)
-    ctx.remove_path(path)
+    ctx.apply_path(od, path)
+    run_solve_search(ctx, od_index + 1)
+    ctx.disapply_path(od, path)
+
 
 def run_solve(ctx):
   """
@@ -44,8 +50,8 @@ def run_solve(ctx):
   odpairs = list(ctx.demand)
 
   for iter in range(1, configuration.max_iter + 1):
+    logging.debug('Starting iteration {}'.format(iter))
     ctx.odpairs = odpairs
-    ctx.modifications = { k: {} for k in odpairs }
 
     run_solve_search(ctx, 0)
 

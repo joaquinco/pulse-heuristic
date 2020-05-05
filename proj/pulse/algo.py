@@ -92,5 +92,9 @@ def pulse(graph, *args, **kwargs):
       context.pulses.add(candidate_pulse)
 
       if adjacent == context.target:
+        # TODO: since yielding every path can end up in exponential space search,
+        # it might be better to just return the best.
+        # TODO: this can be also enforced buy giving a primal_bound that is low
+        # enough
         yield candidate_pulse.to_path(), dict(candidate_pulse.weights)
 
