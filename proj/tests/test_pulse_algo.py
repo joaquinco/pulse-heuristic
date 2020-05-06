@@ -27,11 +27,13 @@ class TestPulseAlgorithm(unittest.TestCase):
 
     source = 1
     target = 4
+
+    constraints = dict(construction_cost=2)
     
     return pulse(
       graph, source, target,
       **{
-        **dict(weight='cost', constraints=None),
+        **dict(weight='cost', constraints=constraints),
         **kwargs,
       }
     )
@@ -70,7 +72,7 @@ class TestPulseAlgorithm(unittest.TestCase):
     self.graph = get_simple_multigraph()
     results = [r for r in self.get_multigraph_pulse()]
 
-    self.assertGreater(len(results), 1)
+    self.assertGreater(len(results), 0)
 
 
 

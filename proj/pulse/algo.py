@@ -89,7 +89,7 @@ def pulse(graph, *args, **kwargs):
     for adjacent, edge in adjacency:
       edge_weights = graph.edges[edge]
 
-      candidate_pulse = Pulse.from_pulse(current, adjacent, edge_weights)
+      candidate_pulse = Pulse.from_pulse(current, adjacent, edge_weights, edge=edge)
 
       # Cost pruning
       if not context.satisfies_cost(candidate_pulse):

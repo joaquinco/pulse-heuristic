@@ -1,6 +1,7 @@
 
 class Pulse(object):
-  def __init__(self, node, weights):
+  def __init__(self, node, weights, edge=None):
+    self.edge = edge
     self.node = node
     self.weights = dict(weights)
     self.prev_pulse = None
@@ -25,7 +26,8 @@ class Pulse(object):
     path = []
 
     while curr:
-      path.append(curr.node)
+      if curr.edge:
+        path.append(curr.edge)
       curr = curr.prev_pulse
 
     path.reverse()
@@ -33,8 +35,8 @@ class Pulse(object):
     return path
 
   @classmethod
-  def from_pulse(cls, pulse, node, weights):
-    ret = Pulse(node, {})
+  def from_pulse(cls, pulse, node, weights, edge=None):
+    ret = Pulse(node, {}, edge=edge)
     ret.prev_pulse = pulse
 
     for key, value in weights.items():

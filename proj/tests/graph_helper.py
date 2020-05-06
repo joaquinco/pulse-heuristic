@@ -46,10 +46,13 @@ def get_simple_multigraph():
 
   infra_count = 4
   infra_factors = [1 / i for i in range(1, infra_count + 1)]
+  cost_factors = [ i * 1.5 for i in range(infra_count)]
 
   for edge, weight in edges.items():
     for index in range(infra_count):
       n1, n2 = edge
-      g.add_edge(n1, n2, cost=weight * infra_factors[index])
+      g.add_edge(
+        n1, n2, cost=weight * infra_factors[index], construction_cost=cost_factors[index]
+      )
 
   return g
