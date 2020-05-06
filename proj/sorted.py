@@ -15,6 +15,19 @@ def _get_key(key, elem):
     return key(elem)
 
 
+def _find_lower(node):
+  """
+  Returns lower valued node, the most on the left
+  """
+  if not node:
+    return None
+
+  current = node
+  while current.left:
+    current = current.left
+
+  return current
+
 class Node(object):
   def __init__(self, elem, key, left=None, right=None):
     self.elem = elem
@@ -60,6 +73,15 @@ class Node(object):
   def __repr__(self):
     return f'<Node key={self.key} elem={self.elem}>'
 
+  def print(self, depth):
+    padding = ' ' * depth
+    print(padding, self)
+    if self.left:
+      print(padding, 'Left')
+      self.left.print(depth + 1)
+    if self.right:
+      print(padding, 'Right')
+      self.right.print(depth + 1)
 
 class BinaryTree(object):
   def __init__(self, iterable=None, key=None):
@@ -103,7 +125,7 @@ class BinaryTree(object):
     ret = self.first.elem
 
     reassign_root = self.root == self.first
-    self.first = self.first.remove()
+    self.first = _find_lower(self.first.remove())
 
     if reassign_root:
       self.root = self.first

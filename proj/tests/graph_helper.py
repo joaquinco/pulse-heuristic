@@ -31,3 +31,25 @@ def get_simple_graph():
     graph.add_edge(*edge, **edge_data)
 
   return graph
+
+
+def get_simple_multigraph():
+  """
+  Builds simple multigraph
+  """
+  g = nx.MultiDiGraph()
+
+  g.add_nodes_from([1, 2, 3, 4])
+  edges = {
+    (1, 2): 2, (2, 3): 3, (3, 4): 3, (2, 4): 5,
+  }
+
+  infra_count = 4
+  infra_factors = [1 / i for i in range(1, infra_count + 1)]
+
+  for edge, weight in edges.items():
+    for index in range(infra_count):
+      n1, n2 = edge
+      g.add_edge(n1, n2, cost=weight * infra_factors[index])
+
+  return g

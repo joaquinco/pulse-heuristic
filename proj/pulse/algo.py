@@ -13,8 +13,12 @@ def _initialize_pulse(
   """
   Initialization phase of pulse algorithm
   """
+  if graph.is_multigraph():
+    some_edges = graph.edges(source, keys=True)
+  else:
+    some_edges = graph.edges(source)
 
-  some_edge = list(nx.edges(graph, source))[0]
+  some_edge = list(some_edges)[0]
   empty_weights = { k: 0 for k in graph.edges[some_edge].keys() }
   
   # Pulses over which we'll iterate
@@ -26,9 +30,11 @@ def _initialize_pulse(
     reverse_graph, target, weight=weight
   )
 
+  constraints = constraints or {}
+
   # For infeasibility pruning
   resource_bounds = {}
-  for key in (constraints or {}).keys():
+  for key in constraints.keys():
     resource_bounds[key] = nx.single_source_dijkstra_path_length(
       reverse_graph, target, weight=key
     )
@@ -73,7 +79,16 @@ def pulse(graph, *args, **kwargs):
 
     current = context.pulses.pop()
 
-    for adjacent, edge_weights in graph.adj[current.node].items():
+    if graph.is_multigraph():
+      out_edges = graph.edges(current.node, keys=True)
+    else:
+      out_edges = graph.edges(current.node)
+
+    adjacency = [(edge[1], edge) for edge in out_edges]
+
+    for adjacent, edge in adjacency:
+      edge_weights = graph.edges[edge]
+
       candidate_pulse = Pulse.from_pulse(current, adjacent, edge_weights)
 
       # Cost pruning
