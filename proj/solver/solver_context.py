@@ -7,17 +7,18 @@ from proj.cache import cached_property
 from proj.constants import infinite
 from .solution import Solution
 from .functions import astar_path_length
+from .graph import construct_multigraph
 
 class SolverContext(Context):
-  def __init__(self, graph, demand, infras, budget, **kwargs):
+  def __init__(self, graph, demand, infrastructures, budget, **kwargs):
     self.graph = graph
     self.demand = demand
-    self.infrastructures = infras
+    self.infrastructures = infrastructures
     self.budget = budget
     self.available_budget = budget
     self.best_objective = infinite
     self.best_solution = Solution(infinite, {})
-    self.current_graph = None
+    self.current_graph = construct_multigraph(graph, infrastructures)
 
     super().__init__(**kwargs)
 
