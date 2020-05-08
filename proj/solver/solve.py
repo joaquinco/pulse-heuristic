@@ -33,7 +33,7 @@ def run_solve_search(ctx, od_index):
 
   paths = pulse(
     ctx.current_graph, source, target,
-    weight='weight', constraints=constraints,
+    weight=configuration.arc_weight_key, constraints=constraints,
     primal_bound=ctx.base_primal_bound[od] * configuration.pulse_primal_bound_factor
   )
 
@@ -55,6 +55,8 @@ def run_solve(ctx):
 
     run_solve_search(ctx, 0)
 
+  return ctx.best_solution
+
 
 def solve(graph, infrastructures, demand, budget):
   """
@@ -62,7 +64,7 @@ def solve(graph, infrastructures, demand, budget):
 
   Args:
     graph: networkx graph instance
-    infrastructures:
+    infrastructures: dict with infrastructure data
     demand: mapping from (o, d) pair to demand amount
     budget: number
   """
@@ -71,7 +73,7 @@ def solve(graph, infrastructures, demand, budget):
   )
 
   try:
-    run_solve(g)
+    return run_solve(g)
   except InterruptedError:
     logging.info('Exporting solution')
     print_report(g)

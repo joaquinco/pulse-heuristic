@@ -1,7 +1,5 @@
 from functools import partial
 
-import pdb
-
 import networkx as nx
 from .pulse import Pulse
 from ..sorted import BinaryTree

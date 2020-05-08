@@ -88,3 +88,15 @@ class SolverContext(Context):
       configuration.od_budget_factor * p + configuration.od_budget_epsilon,
       self.available_budget
     )
+
+  @cached_property
+  def base_primal_bound(self):
+    """
+    Returns best path cost per OD in base graph.
+    """
+    ret = {}
+
+    for od in self.demand.keys():
+      ret[od] = astar_path_length(self.graph, *od)
+
+    return ret

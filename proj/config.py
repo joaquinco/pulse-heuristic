@@ -9,6 +9,8 @@ defaults = dict(
   arc_weight_key='weight',
   # construction arc cost key
   arc_cost_key='construction_cost',
+  # Constant factor to multiply cost, which is also multiplied by edge weight
+  construction_constant=1,
   # Factor of euclidean distance to be used as heuristic function
   astar_heuristic_factor=1,
   # Multiply factor of best cost path on base graph, from which pulse algorithm will yield paths

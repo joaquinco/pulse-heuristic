@@ -12,22 +12,19 @@ def construct_multigraph(graph, infrastructures):
   infras = InfrastructureContext(**infrastructures)
 
   ret = nx.MultiDiGraph()
-  
-  # Add base graph nodes and edges
-  ret.add_nodes_from(graph.nodes())
-  ret.add_edges_from(graph.edges(), **{
-    configuration.arc_cost_key: 0
-  })
 
-  for infra_index in range(len(infras.cost_factors)):
+  for infra_index in range(len(infras.cost_factors) + 1):
     for edge in graph.edges():
       n1, n2 = edge
-      data = graph.edges[edge]
-      ret.add_edge(
-        n1, n2,
-        **data,
-        **infras.get_edge_weights(infra_index, edge, data)
-      )
+      data = dict(graph.edges[edge])
+      if infra_index == 0:
+        data.update({
+          configuration.arc_cost_key: 0
+        })
+      else:
+        data.update(infras.get_edge_weights(infra_index - 1, edge, data))
+
+      ret.add_edge(n1, n2, **data)
   
   return ret
 
@@ -38,15 +35,17 @@ class InfrastructureContext(Context):
     self._validate()
 
   def get_edge_weights(self, infra, edge, edge_attrs):
+    weight = edge_attrs[configuration.arc_weight_key]
+
     if edge in self.costs:
       cost = self.costs.get(edge)
     else:
-      cost = edge_attrs[configuration.arc_weight_key] * self.cost_factors[infra]
+      cost = weight * self.cost_factors[infra]
 
     if edge in self.construction_costs:
       construction_cost = self.construction_costs.get(edge)
     else:
-      construction_cost = edge_attrs[configuration.arc_cost_key] * self.construction_cost_factors[infra]
+      construction_cost = configuration.construction_constant * weight * self.construction_cost_factors[infra]
     
     return {
       configuration.arc_weight_key: cost,
@@ -75,13 +74,11 @@ class InfrastructureContext(Context):
     infras = self
 
     infra_keys = ['cost_factors', 'construction_cost_factors', 'costs', 'construction_costs']
-
-    for key in infra_keys:
-      value = infras.get('key')
-      if not value:
-        raise Exception(f'Missing infrastructures {key}')
       
     for key in infra_keys[:2]:
+      value = infras.get(key)
+      if not value:
+        raise Exception(f'Missing infrastructures {key}')
       if not isinstance(value, list):
         raise Exception(f'{key} must be an list')
 
@@ -91,8 +88,12 @@ class InfrastructureContext(Context):
     for key in infra_keys[2:]:
       value = infras.get(key)
 
-      if value and not isinstance(value, list):
+      if not value:
+        infras[key] = []
+        continue
+
+      if not hasattr(value, '__iter__'):
         raise Exception(f'{key} must be an list')
 
-      if any(map(lambda x: not isinstance(x, dict)), value):
+      if any(map(lambda x: not isinstance(x, dict), value)):
         raise Exception(f'{key} must be an list of dicts')
