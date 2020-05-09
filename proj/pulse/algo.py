@@ -22,30 +22,16 @@ def _initialize_pulse(
   # Pulses over which we'll iterate
   pulses = BinaryTree([Pulse(source, empty_weights)], key=lambda p: p.weights[weight])
 
-  # For cost pruning
-  reverse_graph = nx.reverse_view(graph)
-  cost_bound_by_node = nx.single_source_dijkstra_path_length(
-    reverse_graph, target, weight=weight
-  )
-
   constraints = constraints or {}
-
-  # For infeasibility pruning
-  resource_bounds = {}
-  for key in constraints.keys():
-    resource_bounds[key] = nx.single_source_dijkstra_path_length(
-      reverse_graph, target, weight=key
-    )
 
   context = PulseContext(
     source=source,
     target=target,
     weight=weight,
+    graph=graph,
     pulses=pulses,
-    cost_bound=cost_bound_by_node,
     best_cost=primal_bound,
     constraints=constraints,
-    resource_bounds=resource_bounds,
   )
 
   return context

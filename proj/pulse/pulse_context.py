@@ -1,16 +1,17 @@
-from proj.constants import infinite
-from ..context import Context
+import networkx as nx
 
+from proj.constants import infinite
+from proj.context import Context
+from proj.cache import cached_property
 class PulseContext(Context):
   def __init__(
         self,
         source=None,
         target=None,
         weight=None,
+        graph=None,
         constraints=None,
-        resource_bounds=None,
         best_cost=None,
-        cost_bound=None,
         **kwargs
       ):
     super().__init__(**kwargs)
@@ -18,11 +19,10 @@ class PulseContext(Context):
     self.source = source
     self.target = target
     self.cost_weight = weight
+    self.graph = graph
     self.constraints = constraints
-    self.resource_bounds = resource_bounds
     self.best_cost = best_cost or infinite
     self.best_cost_fixed = bool(best_cost)
-    self.cost_bound = cost_bound
     self.pulses_by_node = {}
 
   def dissatisfies_constraints(self, pulse):
@@ -42,7 +42,10 @@ class PulseContext(Context):
     """
     Returns if pulse should not be pruned by cost bound
     """
-    if self.cost_bound[pulse.node] + pulse.weights[self.cost_weight] > self.best_cost:
+    # If target is unreachable from pulse.node, then infinite
+    estimated_target_cost = self.cost_bound.get(pulse.node, infinite)
+
+    if estimated_target_cost + pulse.weights[self.cost_weight] > self.best_cost:
       return False
     
     return True
@@ -73,3 +76,27 @@ class PulseContext(Context):
 
     self.pulses_by_node[pulse.node] = node_pulses
 
+  @cached_property
+  def cost_bound(self):
+    """For infeasability pruning"""
+    ret = nx.single_source_dijkstra_path_length(
+      self.reverse_graph, self.target, weight=self.weight
+    )
+
+    return ret
+
+  @cached_property
+  def resource_bounds(self):
+    """For infeasibility pruning"""
+    resource_bounds = {}
+
+    for key in self.constraints.keys():
+      resource_bounds[key] = nx.single_source_dijkstra_path_length(
+        self.reverse_graph, self.target, weight=key
+      )
+
+    return resource_bounds
+
+  @cached_property
+  def reverse_graph(self):
+    return nx.reverse_view(self.graph)

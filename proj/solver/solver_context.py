@@ -6,7 +6,7 @@ from proj.context import Context
 from proj.cache import cached_property
 from proj.constants import infinite
 from .solution import Solution
-from .functions import astar_path_length
+from .functions import astar_path_length, get_zero_weight_subgraph
 from .graph import construct_multigraph
 
 class SolverContext(Context):
@@ -31,8 +31,14 @@ class SolverContext(Context):
     """
     ac = 0
 
-    for od, demand_amount in self.demand.keys():
-      ac += demand_amount * astar_path_length(self.current_graph, *od)
+    result_graph = get_zero_weight_subgraph(
+      self.current_graph, configuration.arc_cost_key
+    )
+
+    for od, demand_amount in self.demand.items():
+      ac += demand_amount * astar_path_length(
+        result_graph, *od, configuration.arc_weight_key
+      )
 
     if ac < self.best_solution.value:
       logging.debug('Best objective {}'.format(ac))
@@ -58,7 +64,7 @@ class SolverContext(Context):
 
     logging.debug('Applying path {} from {}'.format(path, od))
 
-    for arc in zip(path[:-1], path[1:]):
+    for arc in path:
       infra_cost = self.current_graph.edges[arc][configuration.arc_cost_key]
       self.available_budget -= infra_cost
       path_weights[arc] = infra_cost
@@ -97,6 +103,6 @@ class SolverContext(Context):
     ret = {}
 
     for od in self.demand.keys():
-      ret[od] = astar_path_length(self.graph, *od)
+      ret[od] = astar_path_length(self.graph, *od, configuration.arc_weight_key)
 
     return ret

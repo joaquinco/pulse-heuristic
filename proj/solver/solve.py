@@ -19,17 +19,16 @@ def print_report(ctx):
 
 def run_solve_search(ctx, od_index):
   """
-  Run recursive algorithm saving best results on the leafs.
+  Run recursive algorithm computing solution score on the leafs.
   """
   if od_index >= len(ctx.odpairs):
     ctx.recompute_objective()
+    return
 
   od = ctx.odpairs[od_index]
   source, target = od
 
-  constraints = dict(
-    cost=ctx.get_budget(od),
-  )
+  constraints = { configuration.arc_cost_key: ctx.get_budget(od) }
 
   paths = pulse(
     ctx.current_graph, source, target,
@@ -37,7 +36,9 @@ def run_solve_search(ctx, od_index):
     primal_bound=ctx.base_primal_bound[od] * configuration.pulse_primal_bound_factor
   )
 
-  for path in paths:
+  for path, path_weights in paths:
+    logging.debug('Found path for {}: {}, {}'.format(od, path, path_weights))
+
     ctx.apply_path(od, path)
     run_solve_search(ctx, od_index + 1)
     ctx.disapply_path(od, path)
@@ -48,6 +49,7 @@ def run_solve(ctx):
   Run metaheristic
   """
   odpairs = list(ctx.demand)
+  random.shuffle(odpairs)
 
   for iter in range(1, configuration.max_iter + 1):
     logging.debug('Starting iteration {}'.format(iter))

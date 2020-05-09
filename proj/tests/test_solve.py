@@ -15,6 +15,7 @@ class SolveTestCase(unittest.TestCase):
     }
 
     configuration.arc_weight_key = 'cost'
+    configuration.max_iter = 1
 
   def test_create_multigraph(self):
     graph = construct_multigraph(self.graph, self.infras)
@@ -29,7 +30,7 @@ class SolveTestCase(unittest.TestCase):
     demand = {
       ('s', 't'):  100,
       ('s', '5'): 50,
-      ('2', '5'): 50,
+      ('2', '4'): 50,
     }
     budget = 10
 
