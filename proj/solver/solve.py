@@ -36,12 +36,17 @@ def run_solve_search(ctx, od_index):
     primal_bound=ctx.base_primal_bound[od] * configuration.pulse_primal_bound_factor
   )
 
-  for path, path_weights in paths:
+  for num, path_info in enumerate(paths):
+    path, path_weights = path_info
+
     logging.debug('Found path for {}: {}, {}'.format(od, path, path_weights))
 
     ctx.apply_path(od, path)
     run_solve_search(ctx, od_index + 1)
     ctx.disapply_path(od, path)
+
+    if num >= configuration.solutions_per_od - 1:
+      return
 
 
 def run_solve(ctx):
@@ -70,6 +75,8 @@ def solve(graph, infrastructures, demand, budget):
     demand: mapping from (o, d) pair to demand amount
     budget: number
   """
+  random.seed(configuration.seed)
+
   g = SolverContext(
     graph, demand, infrastructures, budget,
   )

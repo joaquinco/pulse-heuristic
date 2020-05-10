@@ -45,7 +45,7 @@ class InfrastructureContext(Context):
     if edge in self.construction_costs:
       construction_cost = self.construction_costs.get(edge)
     else:
-      construction_cost = configuration.construction_constant * weight * self.construction_cost_factors[infra]
+      construction_cost = configuration.construction_coefficient * weight * self.construction_cost_factors[infra]
     
     return {
       configuration.arc_weight_key: cost,
