@@ -16,6 +16,7 @@ class SolveTestCase(unittest.TestCase):
 
     configuration.arc_weight_key = 'cost'
     configuration.max_iter = 1
+    configuration.pulse_primal_bound_factor = 0.95
 
   def test_create_multigraph(self):
     graph = construct_multigraph(self.graph, self.infras)
@@ -30,15 +31,15 @@ class SolveTestCase(unittest.TestCase):
       self.assertIsNotNone(construction_cost)
       self.assertGreaterEqual(construction_cost, 0)
 
-
   def test_solve_basic(self):
     demand = {
       ('s', 't'):  100,
       ('s', '5'): 50,
       ('2', '4'): 50,
     }
-    budget = 10
+    budget = 30
 
     solution = solve(self.graph, self.infras, demand, budget)
+
     self.assertIsNotNone(solution)
     self.assertLess(solution.value, infinite)
