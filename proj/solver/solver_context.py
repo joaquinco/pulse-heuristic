@@ -91,7 +91,7 @@ class SolverContext(Context):
     p = self.demand[od] / self.total_demand
 
     return min(
-      configuration.od_budget_factor * p + configuration.od_budget_epsilon,
+      configuration.od_budget_factor * p * self.budget + configuration.od_budget_epsilon,
       self.available_budget
     )
 

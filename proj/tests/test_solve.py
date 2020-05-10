@@ -22,9 +22,14 @@ class SolveTestCase(unittest.TestCase):
 
     self.assertTrue(graph.is_multigraph())
 
-    for (n1, n2, cost) in graph.edges.data('cost'):
+    for _, _, cost in graph.edges.data('cost'):
       self.assertIsNotNone(cost)
-      self.assertGreaterEqual(cost, 0)
+      self.assertGreater(cost, 0)
+
+    for _, _, construction_cost in graph.edges.data('construction_cost'):
+      self.assertIsNotNone(construction_cost)
+      self.assertGreaterEqual(construction_cost, 0)
+
 
   def test_solve_basic(self):
     demand = {
@@ -35,6 +40,5 @@ class SolveTestCase(unittest.TestCase):
     budget = 10
 
     solution = solve(self.graph, self.infras, demand, budget)
-
     self.assertIsNotNone(solution)
     self.assertLess(solution.value, infinite)
