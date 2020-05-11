@@ -78,7 +78,7 @@ def solve(graph, infrastructures, demand, budget):
   random.seed(configuration.seed)
 
   g = SolverContext(
-    graph, demand, infrastructures, budget,
+    graph, infrastructures, demand, budget,
   )
 
   try:

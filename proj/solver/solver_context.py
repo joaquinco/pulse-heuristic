@@ -10,7 +10,7 @@ from .functions import astar_path_length, get_zero_weight_subgraph
 from .graph import construct_multigraph
 
 class SolverContext(Context):
-  def __init__(self, graph, demand, infrastructures, budget, **kwargs):
+  def __init__(self, graph, infrastructures, demand, budget, **kwargs):
     self.graph = graph
     self.demand = demand
     self.infrastructures = infrastructures

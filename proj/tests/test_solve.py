@@ -1,5 +1,6 @@
 import unittest
 from proj import solve
+from proj.solver import export
 from proj.solver.graph import construct_multigraph
 from proj.config import configuration
 from proj.constants import infinite
@@ -13,6 +14,13 @@ class SolveTestCase(unittest.TestCase):
       'cost_factors': [0.9, 0.5, 0.4],
       'construction_cost_factors': [1, 4, 8],
     }
+
+    self.demand = {
+      ('s', 't'):  100,
+      ('s', '5'): 50,
+      ('2', '4'): 50,
+    }
+    self.budget = 30
 
     configuration.arc_weight_key = 'cost'
     configuration.max_iter = 1
@@ -32,14 +40,17 @@ class SolveTestCase(unittest.TestCase):
       self.assertGreaterEqual(construction_cost, 0)
 
   def test_solve_basic(self):
-    demand = {
-      ('s', 't'):  100,
-      ('s', '5'): 50,
-      ('2', '4'): 50,
-    }
-    budget = 30
-
-    solution = solve(self.graph, self.infras, demand, budget)
+    solution = solve(self.graph, self.infras, self.demand, self.budget)
 
     self.assertIsNotNone(solution)
     self.assertLess(solution.value, infinite)
+
+  def test_export_basic(self):
+    with open('data.dat', 'w') as output:
+      export(output, self.graph, self.infras, self.demand, self.budget)
+
+    with open('data.dat', 'r') as input:
+      data = input.read()
+
+    self.assertTrue(data)
+    self.assertGreater(len(data), 1500)
