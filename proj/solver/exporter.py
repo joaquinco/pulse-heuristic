@@ -39,15 +39,13 @@ def export(output, graph, infrastructures, demand, budget):
   for n in nodes:
     adjs = reverse_graph.adj[n]
     adj_edges = map(edge_name, [(a, n) for a in adjs])
-    val = fl(adj_edges) if adjs else '{}'
-    w(f'set inbound[{n}] := {val};')
+    w(f'set inbound[{n}] := {fl(adj_edges)};')
   w()
   
   for n in nodes:
     adjs = graph.adj[n]
     adj_edges = map(edge_name, [(n, a) for a in adjs])
-    val = fl(adj_edges) if adjs else '{}'
-    w(f'set outbound[{n}] := {val};')
+    w(f'set outbound[{n}] := {fl(adj_edges)};')
   w()
   
   infras_count = len(infrastructures.get('cost_factors')) + 1
@@ -67,7 +65,7 @@ def export(output, graph, infrastructures, demand, budget):
 
   w(f'param budget := {budget};')
 
-  w(f'param weights :=', line_break=False)
+  w(f'param weight :=', line_break=False)
   for edge in ctx.current_graph.edges(keys=True):
     n1, n2, infra = edge
     weight = ctx.current_graph.edges[edge][configuration.arc_weight_key]
