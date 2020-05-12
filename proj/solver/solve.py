@@ -25,8 +25,11 @@ def run_solve_search(ctx, od_index):
     ctx.recompute_objective()
     return
 
+
   od = ctx.odpairs[od_index]
   source, target = od
+
+  logging.debug('Running for od {}'.format(od))
 
   constraints = { configuration.arc_cost_key: ctx.get_budget(od) }
 
