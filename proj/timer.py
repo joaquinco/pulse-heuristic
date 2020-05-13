@@ -12,8 +12,8 @@ def timed(message):
         end = datetime.now()
         ms = (end - start).microseconds
         unit = 'ms'
-        if ms > 1e5:
-          ms = ms / 1e6
+        if ms > 1e4:
+          ms = ms / 1e5
           unit = 's'
 
         logging.debug(f'{message or name} took {ms}{unit}')

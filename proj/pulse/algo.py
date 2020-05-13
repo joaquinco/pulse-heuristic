@@ -33,7 +33,7 @@ def pulse(graph, *args, **kwargs):
     graph: networkx graph instance
     source: source node
     target: target node
-    weight: edge weight to minimize, default 'weight'
+    weight: edge weight to minimize
     constraints: dict of constraints, default None
     primal_bound: path cost between source and target used to bound branches.
 
@@ -51,10 +51,11 @@ def pulse(graph, *args, **kwargs):
   inf_pruned = 0
 
   while True:
-    if not context.pulses:
+    current = context.pop_pulse()
+
+    if not current:
       return
 
-    current = context.pop_pulse()
     iteration += 1
 
     if iteration % 10000 == 0:

@@ -119,7 +119,7 @@ class PulseContext(Context):
     """For infeasability pruning"""
     dijkstra = timed('cost bound dijkstra')(nx.single_source_dijkstra_path_length)
     ret = dijkstra(
-      self.reverse_graph, self.target, weight=self.weight
+      self.reverse_graph, self.target, weight=self.cost_weight
     )
 
     if ret.get(self.source) is None:
@@ -150,6 +150,9 @@ class PulseContext(Context):
     """
     while True:
       pulse = self.pulses.pop()
+
+      if not pulse:
+        return None
 
       if pulse.dominated:
         continue
