@@ -28,6 +28,27 @@ def _find_lower(node):
 
   return current
 
+def _insert_node(root, node):
+  """
+  Iterative inserts a node in the tree
+  """
+  curr = root
+
+  while True:
+    if node.key <= curr.key:
+      if curr.left:
+        curr = curr.left
+        continue
+      curr.left = node
+    else:
+      if curr.right:
+        curr = curr.right
+        continue
+      curr.right = node
+
+    node.parent = curr
+    break
+
 class Node(object):
   def __init__(self, elem, key, left=None, right=None):
     self.elem = elem
@@ -35,18 +56,6 @@ class Node(object):
     self.left = left
     self.right = right
     self.parent = None
-
-  def insert(self, node):
-    if node.key <= self.key:
-      if self.left:
-        return self.left.insert(node)
-      self.left = node
-    else:
-      if self.right:
-        return self.right.insert(node)
-      self.right = node
-
-    node.parent = self
   
   def remove(self):
     if self.left:
@@ -112,7 +121,7 @@ class BinaryTree(object):
 
       return
 
-    self.root.insert(node)
+    _insert_node(self.root, node)
     # TODO: Balance tree
 
     if node.key <= self.first.key:

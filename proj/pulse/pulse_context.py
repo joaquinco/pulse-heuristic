@@ -86,7 +86,6 @@ class PulseContext(Context):
     Remove pulses that are dominated by the new one and add the pulse
     to the queue.
     """
-    self.pulses.add(pulse)
     node_pulses = self.pulses_by_node.get(pulse.node, set())
 
     to_remove = set()
@@ -98,13 +97,15 @@ class PulseContext(Context):
     node_pulses -= to_remove
     node_pulses.add(pulse)
 
+    self.pulses_by_node[pulse.node] = node_pulses
+    self.pulses.add(pulse)
+
     # Update best cost if needed
     is_target = self.target == pulse.node
     pulse_cost = pulse.weights[self.cost_weight]
     if is_target and pulse_cost < self.best_cost and not self.best_cost_fixed:
       self.best_cost = pulse_cost
 
-    self.pulses_by_node[pulse.node] = node_pulses
 
   @cached_property
   def cost_bound(self):
