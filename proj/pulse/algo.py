@@ -63,6 +63,10 @@ def pulse(graph, *args, **kwargs):
     adjacency = [(edge[1], edge) for edge in out_edges]
 
     for adjacent, edge in adjacency:
+      if adjacent == current.node:
+        # Ignore self loops
+        continue
+
       edge_weights = graph.edges[edge]
 
       candidate_pulse = Pulse.from_pulse(current, adjacent, edge_weights, edge)

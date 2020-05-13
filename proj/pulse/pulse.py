@@ -36,4 +36,4 @@ class Pulse(object):
     return ret
 
   def __repr__(self):
-    return f'<Pulse node={self.node} weights={self.weights}>'
+    return f'<Pulse node={self.node} len={len(self.prev_path)} weights={self.weights}>'

@@ -115,6 +115,9 @@ class PulseContext(Context):
       self.reverse_graph, self.target, weight=self.weight
     )
 
+    if ret.get(self.source) is None:
+      raise Exception(f'{self.target} is not reachable from {self.source}')
+
     return ret
 
   @cached_property

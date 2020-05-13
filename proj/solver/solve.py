@@ -25,7 +25,6 @@ def run_solve_search(ctx, od_index):
     ctx.recompute_objective()
     return
 
-
   od = ctx.odpairs[od_index]
   source, target = od
 
