@@ -82,12 +82,18 @@ class PulseContext(Context):
     return False
 
   def save_pulse(self, pulse):
+    """
+    Remove pulses that are dominated by the new one and add the pulse
+    to the queue.
+    """
+    self.pulses.add(pulse)
     node_pulses = self.pulses_by_node.get(pulse.node, set())
 
     to_remove = set()
     for other_pulse in node_pulses:
       if pulse.dominates(other_pulse):
         to_remove.add(other_pulse)
+        other_pulse.dominated = True
 
     node_pulses -= to_remove
     node_pulses.add(pulse)
@@ -126,3 +132,19 @@ class PulseContext(Context):
   @cached_property
   def reverse_graph(self):
     return nx.reverse_view(self.graph)
+
+  def pop_pulse(self):
+    """
+    Pop a pulse from the queue. Also removes it from the node.
+    """
+    while True:
+      pulse = self.pulses.pop()
+
+      if pulse.dominated:
+        continue
+
+      node_pulses = self.pulses_by_node.get(pulse.node)
+      if node_pulses:
+        node_pulses.remove(pulse)
+
+      return pulse

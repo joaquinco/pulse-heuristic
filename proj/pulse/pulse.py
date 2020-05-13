@@ -5,6 +5,7 @@ class Pulse(object):
     self.node = node
     self.weights = dict(weights)
     self.prev_path = []
+    self.dominated = False
 
   def dominates(self, other_pulse):
     """

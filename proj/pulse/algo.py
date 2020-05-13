@@ -49,7 +49,7 @@ def pulse(graph, *args, **kwargs):
     if not context.pulses:
       return
 
-    current = context.pulses.pop()
+    current = context.pop_pulse()
     iteration += 1
 
     if iteration % 10000 == 0:
@@ -80,7 +80,6 @@ def pulse(graph, *args, **kwargs):
         continue
 
       context.save_pulse(candidate_pulse)
-      context.pulses.add(candidate_pulse)
 
       if adjacent == context.target:
         # TODO: since yielding every path can end up in exponential space search,
