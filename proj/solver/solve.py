@@ -30,12 +30,18 @@ def run_solve_search(ctx, od_index):
   source, target = od
 
   constraints = { configuration.arc_cost_key: ctx.get_budget(od) }
-  logging.debug('Running for od {} with constraints {}'.format(od, constraints))
+  primal_bound = ctx.base_primal_bound[od] * configuration.pulse_primal_bound_factor
+
+  logging.debug(
+    'Running od {}, constraints: {}, primal_bound: {}'.format(
+      od, constraints, primal_bound
+    )
+  )
 
   paths = pulse(
     ctx.current_graph, source, target,
     weight=configuration.arc_weight_key, constraints=constraints,
-    primal_bound=ctx.base_primal_bound[od] * configuration.pulse_primal_bound_factor
+    primal_bound=primal_bound
   )
 
   for num, path_info in enumerate(paths):

@@ -4,6 +4,8 @@ from proj.constants import infinite
 from proj.context import Context
 from proj.cache import cached_property
 from proj.timer import timed
+from .pulse import Pulse
+from ..sorted import BinaryTree
 
 class PulseContext(Context):
   def __init__(
@@ -26,6 +28,29 @@ class PulseContext(Context):
     self.best_cost = best_cost or infinite
     self.best_cost_fixed = bool(best_cost)
     self.pulses_by_node = {}
+    self._init_pulses()
+
+  def _init_pulses(self):
+    if self.graph.is_multigraph():
+      some_edges = self.graph.edges(self.source, keys=True)
+    else:
+      some_edges = self.graph.edges(self.source)
+
+    some_edge = list(some_edges)[0]
+    empty_weights = { k: 0 for k in self.graph.edges[some_edge].keys() }
+    
+    # Pulses over which we'll iterate
+    self.pulses = BinaryTree(
+      [Pulse(self.source, empty_weights)], key=self._pulse_projected_weight
+    )
+
+  def _pulse_projected_weight(self, pulse):
+    """
+    Key by which pulses are sorted. It will determinate which pulse to consider in
+    each
+    """
+    # If target is unreachable from pulse.node, then infinite
+    return self.cost_bound.get(pulse.node, infinite) + pulse.weights[self.cost_weight]
 
   def dissatisfies_constraints(self, pulse):
     """
@@ -44,10 +69,7 @@ class PulseContext(Context):
     """
     Returns if pulse should not be pruned by cost bound
     """
-    # If target is unreachable from pulse.node, then infinite
-    estimated_target_cost = self.cost_bound.get(pulse.node, infinite)
-
-    if estimated_target_cost + pulse.weights[self.cost_weight] > self.best_cost:
+    if self._pulse_projected_weight(pulse) > self.best_cost:
       return False
     
     return True

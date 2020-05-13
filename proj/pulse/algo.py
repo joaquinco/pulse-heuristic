@@ -3,7 +3,6 @@ import logging
 
 import networkx as nx
 from .pulse import Pulse
-from ..sorted import BinaryTree
 from .pulse_context import PulseContext
 
 def _initialize_pulse(
@@ -11,17 +10,6 @@ def _initialize_pulse(
   """
   Initialization phase of pulse algorithm
   """
-  if graph.is_multigraph():
-    some_edges = graph.edges(source, keys=True)
-  else:
-    some_edges = graph.edges(source)
-
-  some_edge = list(some_edges)[0]
-  empty_weights = { k: 0 for k in graph.edges[some_edge].keys() }
-  
-  # Pulses over which we'll iterate
-  pulses = BinaryTree([Pulse(source, empty_weights)], key=lambda p: p.weights[weight])
-
   constraints = constraints or {}
 
   context = PulseContext(
@@ -29,7 +17,6 @@ def _initialize_pulse(
     target=target,
     weight=weight,
     graph=graph,
-    pulses=pulses,
     best_cost=primal_bound,
     constraints=constraints,
   )

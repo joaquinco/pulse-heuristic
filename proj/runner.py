@@ -26,18 +26,17 @@ def run_comparison():
   }
 
   demand = {
-    ('15384', '6763'): 500,
-    ('1160', '103'): 50,
-    ('15384', '16611'): 100,
-    ('15507', '6428'): 150,
-    ('15384', '15507'): 300,
+    ('14880', '87'): 500,
+    ('6933', '16825'): 50,
+    ('6988', '11437'): 100,
+    ('16108', '6987'): 350,
   }
-
   budget = 15000
 
-  timed_solve = timed(solve)
+  timed_export = timed('Export to mathprog')(export)
+  with open(f'{file_path_prefix}.dat', 'w') as data_file:
+    timed_export(data_file, graph, infrastructures, demand, budget)
 
+  timed_solve = timed('Main problem solve')(solve)
   timed_solve(graph, infrastructures, demand, budget)
 
-  with open(f'{file_path_prefix}.dat', 'w') as data_file:
-    export(data_file, graph, infrastructures, demand, budget)
