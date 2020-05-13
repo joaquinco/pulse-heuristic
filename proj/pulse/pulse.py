@@ -10,16 +10,16 @@ class Pulse(object):
     """
     Returns True if self dominates other_pulse
     """
-    keys = self.weights.keys()
-    to_compare = zip(
-        [self.weights[k] for k in keys],
-        [other_pulse.weights[k] for k in keys]
-    )
+    has_strict_lt = False
+
+    for k, v in self.weights.items():
+      other = other_pulse.weights[k]
+      if v > other:
+        return False
+
+      has_strict_lt = v < other
     
-    # all weights from self are greater or equal and there exists
-    # one that is greater
-    return all(map(lambda x: x[0] <= x[1], to_compare)) and \
-           any(map(lambda x: x[0] < x[1], to_compare))
+    return has_strict_lt
 
   def to_path(self):
     return self.prev_path[:]
