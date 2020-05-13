@@ -29,9 +29,8 @@ def run_solve_search(ctx, od_index):
   od = ctx.odpairs[od_index]
   source, target = od
 
-  logging.debug('Running for od {}'.format(od))
-
   constraints = { configuration.arc_cost_key: ctx.get_budget(od) }
+  logging.debug('Running for od {} with constraints {}'.format(od, constraints))
 
   paths = pulse(
     ctx.current_graph, source, target,

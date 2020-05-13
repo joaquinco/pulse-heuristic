@@ -1,28 +1,16 @@
 from os import path
-from datetime import datetime
 import logging
 
 import networkx as nx
 
 from proj.solver import solve, export
 from proj.config import configuration
+from proj.timer import timed
 
 logging.basicConfig(
   level=logging.DEBUG,
   format='%(asctime)-15s %(message)s'
 )
-
-def timed(wrapped):
-  def wrapper(*args, **kwargs):
-    try:
-      start = datetime.now()
-      name = wrapped.__name__
-      return wrapped(*args, **kwargs)
-    finally:
-      end = datetime.now()
-      logging.info(f'{name} took  {(end - start).seconds} secs')
-
-  return wrapper
 
 def run_comparison():
   configuration.arc_weight_key = 'weight'

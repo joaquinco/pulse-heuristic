@@ -3,6 +3,8 @@ import networkx as nx
 from proj.constants import infinite
 from proj.context import Context
 from proj.cache import cached_property
+from proj.timer import timed
+
 class PulseContext(Context):
   def __init__(
         self,
@@ -79,7 +81,8 @@ class PulseContext(Context):
   @cached_property
   def cost_bound(self):
     """For infeasability pruning"""
-    ret = nx.single_source_dijkstra_path_length(
+    dijkstra = timed('cost bound dijkstra')(nx.single_source_dijkstra_path_length)
+    ret = dijkstra(
       self.reverse_graph, self.target, weight=self.weight
     )
 
@@ -91,7 +94,8 @@ class PulseContext(Context):
     resource_bounds = {}
 
     for key in self.constraints.keys():
-      resource_bounds[key] = nx.single_source_dijkstra_path_length(
+      dijkstra = timed(f'{key} bound dijkstra')(nx.single_source_dijkstra_path_length)
+      resource_bounds[key] = dijkstra(
         self.reverse_graph, self.target, weight=key
       )
 

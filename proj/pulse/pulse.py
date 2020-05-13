@@ -4,7 +4,7 @@ class Pulse(object):
     self.edge = edge
     self.node = node
     self.weights = dict(weights)
-    self.prev_pulse = None
+    self.prev_path = []
 
   def dominates(self, other_pulse):
     """
@@ -22,22 +22,12 @@ class Pulse(object):
            any(map(lambda x: x[0] < x[1], to_compare))
 
   def to_path(self):
-    curr = self
-    path = []
-
-    while curr:
-      if curr.edge:
-        path.append(curr.edge)
-      curr = curr.prev_pulse
-
-    path.reverse()
-
-    return path
+    return self.prev_path[:]
 
   @classmethod
-  def from_pulse(cls, pulse, node, weights, edge=None):
+  def from_pulse(cls, pulse, node, weights, edge):
     ret = Pulse(node, {}, edge=edge)
-    ret.prev_pulse = pulse
+    ret.prev_path = pulse.prev_path + [edge]
 
     for key, value in weights.items():
       ret.weights[key] = pulse.weights[key] + value

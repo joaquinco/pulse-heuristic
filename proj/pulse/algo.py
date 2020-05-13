@@ -1,10 +1,10 @@
 from functools import partial
+import logging
 
 import networkx as nx
 from .pulse import Pulse
 from ..sorted import BinaryTree
 from .pulse_context import PulseContext
-
 
 def _initialize_pulse(
   graph, source, target, weight='weight', constraints=None, primal_bound=None):
@@ -57,11 +57,16 @@ def pulse(graph, *args, **kwargs):
 
   context = _initialize_pulse(graph, *args, **kwargs)
 
+  iteration = 0
   while True:
     if not context.pulses:
       return
 
     current = context.pulses.pop()
+    iteration += 1
+
+    if iteration % 10000 == 0:
+      logging.debug(f'Pulse: current {current}, stack: {context.pulses}')
 
     if graph.is_multigraph():
       out_edges = graph.edges(current.node, keys=True)
@@ -73,7 +78,7 @@ def pulse(graph, *args, **kwargs):
     for adjacent, edge in adjacency:
       edge_weights = graph.edges[edge]
 
-      candidate_pulse = Pulse.from_pulse(current, adjacent, edge_weights, edge=edge)
+      candidate_pulse = Pulse.from_pulse(current, adjacent, edge_weights, edge)
 
       # Cost pruning
       if not context.satisfies_cost(candidate_pulse):

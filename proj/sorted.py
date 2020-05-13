@@ -136,3 +136,6 @@ class BinaryTree(object):
 
   def __len__(self):
     return self.length
+
+  def __repr__(self):
+    return f'<BinaryTree len={len(self)} first={self.first}>'
