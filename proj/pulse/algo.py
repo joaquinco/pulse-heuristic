@@ -4,6 +4,7 @@ import logging
 import networkx as nx
 from .pulse import Pulse
 from .pulse_context import PulseContext
+from proj.config import configuration
 
 def _initialize_pulse(
   graph, source, target, weight='weight', constraints=None, primal_bound=None):
@@ -45,6 +46,10 @@ def pulse(graph, *args, **kwargs):
   context = _initialize_pulse(graph, *args, **kwargs)
 
   iteration = 0
+  cost_pruned = 0
+  dominance_pruned = 0
+  inf_pruned = 0
+
   while True:
     if not context.pulses:
       return
@@ -53,7 +58,13 @@ def pulse(graph, *args, **kwargs):
     iteration += 1
 
     if iteration % 10000 == 0:
-      logging.debug(f'Pulse: current {current}, stack: {context.pulses}')
+      logging.debug(f'Pulse: current {current}, stack len: {len(context.pulses)}')
+      logging.debug(
+        f'Pruned by cost: {cost_pruned}, dominance: {dominance_pruned}, infeasibility: {inf_pruned}'
+      )
+      logging.debug(
+        'Active pulses: {total_pulses}, nodes reached: {nodes_reached}, total nodes: {total_nodes}'.format(**context.stats())
+      )
 
     if graph.is_multigraph():
       out_edges = graph.edges(current.node, keys=True)
@@ -67,20 +78,28 @@ def pulse(graph, *args, **kwargs):
         # Ignore self loops
         continue
 
+      if configuration.pulse_discard_faraway_nodes \
+        and context.get_cost_bound(current.node) < context.get_cost_bound(adjacent):
+        # Ignore adjacent whose lower bound cost is greater than current
+        continue
+
       edge_weights = graph.edges[edge]
 
       candidate_pulse = Pulse.from_pulse(current, adjacent, edge_weights, edge)
 
       # Cost pruning
       if not context.satisfies_cost(candidate_pulse):
+        cost_pruned += 1
         continue
       
       # Infeasibility pruning
       if context.dissatisfies_constraints(candidate_pulse):
+        inf_pruned += 1
         continue
       
       # Dominance pruning
       if context.is_dominated(candidate_pulse):
+        dominance_pruned += 1
         continue
 
       context.save_pulse(candidate_pulse)

@@ -15,7 +15,7 @@ logging.basicConfig(
 def run_comparison():
   configuration.arc_weight_key = 'weight'
   configuration.max_iter = 1
-  configuration.pulse_primal_bound_factor = 0.95
+  configuration.pulse_primal_bound_factor = 0.90
 
   file_path_prefix = path.join(path.dirname(__file__), '..', 'data/mdeo_med')
   graph = nx.read_yaml(f'{file_path_prefix}.yml')
@@ -27,11 +27,20 @@ def run_comparison():
 
   demand = {
     ('14880', '87'): 500,
-    ('6933', '16825'): 50,
+    # ('6933', '16825'): 50,
     ('6988', '11437'): 100,
     ('16108', '6987'): 350,
   }
   budget = 15000
+
+  logging.info(
+    f"""\n
+    Running params:
+    demand: {demand}
+    budget: {budget}
+    graph_file: {file_path_prefix}
+    """
+  )
 
   timed_export = timed('Export to mathprog')(export)
   with open(f'{file_path_prefix}.dat', 'w') as data_file:

@@ -43,7 +43,10 @@ def run_solve_search(ctx, od_index):
     primal_bound=primal_bound
   )
 
+  found = False
+
   for num, path_info in enumerate(paths):
+    found = True
     path, path_weights = path_info
 
     logging.debug('Found path for {}: {}, {}'.format(od, path, path_weights))
@@ -55,6 +58,8 @@ def run_solve_search(ctx, od_index):
     if num >= configuration.solutions_per_od - 1:
       return
 
+  if not found:
+    logging.warning(f'Path not found for {od}')
 
 def run_solve(ctx):
   """
@@ -64,7 +69,7 @@ def run_solve(ctx):
   random.shuffle(odpairs)
 
   for iter in range(1, configuration.max_iter + 1):
-    logging.debug('Starting iteration {}'.format(iter))
+    logging.debug('Main iteration {}, ods: {}'.format(iter, odpairs))
     ctx.odpairs = odpairs
 
     run_solve_search(ctx, 0)

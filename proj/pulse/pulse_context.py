@@ -28,6 +28,8 @@ class PulseContext(Context):
     self.best_cost = best_cost or infinite
     self.best_cost_fixed = bool(best_cost)
     self.pulses_by_node = {}
+    self.total_pulses = 0
+    self.nodes_reached = set()
     self._init_pulses()
 
   def _init_pulses(self):
@@ -41,22 +43,24 @@ class PulseContext(Context):
     
     # Pulses over which we'll iterate
     self.pulses = BinaryTree(
-      [Pulse(self.source, empty_weights)], key=self._pulse_projected_weight
+      [Pulse(self.source, empty_weights)], key=self.projected_weight
     )
 
-  def _pulse_projected_weight(self, pulse):
+  def projected_weight(self, pulse):
     """
     Key by which pulses are sorted. It will determinate which pulse to consider in
     each
     """
+    return self.get_cost_bound(pulse.node) + pulse.weights[self.cost_weight]
+
+  def get_cost_bound(self, node):
     # If target is unreachable from pulse.node, then infinite
-    return self.cost_bound.get(pulse.node, infinite) + pulse.weights[self.cost_weight]
+    return self.cost_bound.get(node, infinite)
 
   def dissatisfies_constraints(self, pulse):
     """
     Returns if should prune by infeasibility
     """
-
     for name, value in self.constraints.items():
       if name == self.cost_weight:
         continue
@@ -69,7 +73,7 @@ class PulseContext(Context):
     """
     Returns if pulse should not be pruned by cost bound
     """
-    if self._pulse_projected_weight(pulse) > self.best_cost:
+    if self.projected_weight(pulse) > self.best_cost:
       return False
     
     return True
@@ -86,8 +90,9 @@ class PulseContext(Context):
     Remove pulses that are dominated by the new one and add the pulse
     to the queue.
     """
-    node_pulses = self.pulses_by_node.get(pulse.node, set())
+    self.nodes_reached.add(pulse.node)
 
+    node_pulses = self.pulses_by_node.get(pulse.node, set())
     to_remove = set()
     for other_pulse in node_pulses:
       if pulse.dominates(other_pulse):
@@ -96,6 +101,8 @@ class PulseContext(Context):
 
     node_pulses -= to_remove
     node_pulses.add(pulse)
+
+    self.total_pulses -= len(to_remove) - 1
 
     self.pulses_by_node[pulse.node] = node_pulses
     self.pulses.add(pulse)
@@ -152,3 +159,14 @@ class PulseContext(Context):
         node_pulses.remove(pulse)
 
       return pulse
+
+  def stats(self):
+    """
+    Return current stats
+    """
+
+    return dict(
+      total_pulses=self.total_pulses,
+      nodes_reached=len(self.nodes_reached),
+      total_nodes=self.graph.number_of_nodes()
+    )

@@ -15,6 +15,8 @@ defaults = dict(
   astar_heuristic_factor=1,
   # Multiply factor of best cost path on base graph, from which pulse algorithm will yield paths
   pulse_primal_bound_factor=1,
+  # On each Pulse iteration, ignore adjacents whose cost_bound is higher that current node.
+  pulse_discard_faraway_nodes=True,
   # Number of times to run the recursive search
   max_iter=10,
   # Per od paths to consider, each recursive search will generate at most solutions_per_od ** od_count paths

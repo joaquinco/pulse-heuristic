@@ -16,7 +16,6 @@ class SolverContext(Context):
     self.infrastructures = infrastructures
     self.budget = budget
     self.available_budget = budget
-    self.best_objective = infinite
     self.best_solution = Solution(infinite, {})
     self.current_graph = construct_multigraph(graph, infrastructures)
 

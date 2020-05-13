@@ -10,7 +10,13 @@ def timed(message):
         return wrapped(*args, **kwargs)
       finally:
         end = datetime.now()
-        logging.debug(f'{message or name} took {(end - start).seconds} secs')
+        ms = (end - start).microseconds
+        unit = 'ms'
+        if ms > 1e5:
+          ms = ms / 1e6
+          unit = 's'
+
+        logging.debug(f'{message or name} took {ms}{unit}')
 
     return wrapper
 
