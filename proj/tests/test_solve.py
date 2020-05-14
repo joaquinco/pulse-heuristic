@@ -46,10 +46,11 @@ class SolveTestCase(unittest.TestCase):
     self.assertLess(solution.value, infinite)
 
   def test_export_basic(self):
-    with open('data.dat', 'w') as output:
+    data_path = '/tmp/proj_solve_data.dat'
+    with open(data_path, 'w') as output:
       export(output, self.graph, self.infras, self.demand, self.budget)
 
-    with open('data.dat', 'r') as input:
+    with open(data_path, 'r') as input:
       data = input.read()
 
     self.assertTrue(data)
