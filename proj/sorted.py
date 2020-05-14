@@ -131,6 +131,9 @@ class BinaryTree(object):
     """
     Pops the lower element from the tree
     """
+    if not self.first:
+      return None
+
     ret = self.first.elem
 
     reassign_root = self.root == self.first
