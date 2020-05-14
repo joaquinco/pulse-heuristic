@@ -28,8 +28,12 @@ class PulseContext(Context):
     self.best_cost = best_cost or infinite
     self.best_cost_fixed = bool(best_cost)
     self.pulses_by_node = {}
-    self.total_pulses = 0
     self.nodes_reached = set()
+    self.total_pulses = 0
+    self.cost_pruned = 0
+    self.dominance_pruned = 0
+    self.inf_pruned = 0
+
     self._init_pulses()
 
   def _init_pulses(self):
@@ -65,6 +69,7 @@ class PulseContext(Context):
       if name == self.cost_weight:
         continue
       if pulse.weights[name] + self.resource_bounds[name][pulse.node] > value:
+        self.inf_pruned += 1
         return True
     
     return False
@@ -74,6 +79,7 @@ class PulseContext(Context):
     Returns if pulse should not be pruned by cost bound
     """
     if self.projected_weight(pulse) > self.best_cost:
+      self.cost_pruned += 1
       return False
     
     return True
@@ -81,6 +87,7 @@ class PulseContext(Context):
   def is_dominated(self, pulse):
     for other_pulse in self.pulses_by_node.get(pulse.node, []):
       if other_pulse.dominates(pulse):
+        self.dominance_pruned += 1
         return True
     
     return False
@@ -171,5 +178,8 @@ class PulseContext(Context):
     return dict(
       total_pulses=self.total_pulses,
       nodes_reached=len(self.nodes_reached),
-      total_nodes=self.graph.number_of_nodes()
+      total_nodes=self.graph.number_of_nodes(),
+      cost_pruned=self.cost_pruned,
+      dominance_pruned=self.dominance_pruned,
+      inf_pruned=self.inf_pruned
     )

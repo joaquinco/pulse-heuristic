@@ -25,6 +25,22 @@ def _initialize_pulse(
   return context
 
 
+def _log_stats(context, current=None):
+  """
+  Log pulse stats
+  """
+  stats = context.stats()
+
+  if current:
+    logging.debug(f'Pulse: current {current}, stack len: {len(context.pulses)}')
+
+  logging.debug(
+    'Pruned by cost: {cost_pruned}, dominance: {dominance_pruned}, infeasibility: {inf_pruned}'.format(**stats)
+  )
+  logging.debug(
+    'Active pulses: {total_pulses}, nodes reached: {nodes_reached}, total nodes: {total_nodes}'.format(**stats)
+  )
+
 def pulse(graph, *args, **kwargs):
   """
   Compute shortest path using pulse algorithm
@@ -46,9 +62,6 @@ def pulse(graph, *args, **kwargs):
   context = _initialize_pulse(graph, *args, **kwargs)
 
   iteration = 0
-  cost_pruned = 0
-  dominance_pruned = 0
-  inf_pruned = 0
 
   while True:
     current = context.pop_pulse()
@@ -59,13 +72,7 @@ def pulse(graph, *args, **kwargs):
     iteration += 1
 
     if iteration % 10000 == 0:
-      logging.debug(f'Pulse: current {current}, stack len: {len(context.pulses)}')
-      logging.debug(
-        f'Pruned by cost: {cost_pruned}, dominance: {dominance_pruned}, infeasibility: {inf_pruned}'
-      )
-      logging.debug(
-        'Active pulses: {total_pulses}, nodes reached: {nodes_reached}, total nodes: {total_nodes}'.format(**context.stats())
-      )
+      _log_stats(context, current)
 
     if graph.is_multigraph():
       out_edges = graph.edges(current.node, keys=True)
@@ -90,17 +97,14 @@ def pulse(graph, *args, **kwargs):
 
       # Cost pruning
       if not context.satisfies_cost(candidate_pulse):
-        cost_pruned += 1
         continue
       
       # Infeasibility pruning
       if context.dissatisfies_constraints(candidate_pulse):
-        inf_pruned += 1
         continue
       
       # Dominance pruning
       if context.is_dominated(candidate_pulse):
-        dominance_pruned += 1
         continue
 
       context.save_pulse(candidate_pulse)
@@ -110,5 +114,6 @@ def pulse(graph, *args, **kwargs):
         # it might be better to just return the best.
         # TODO: this can be also enforced buy giving a primal_bound that is low
         # enough
+        _log_stats(context)
         yield candidate_pulse.to_path(), dict(candidate_pulse.weights)
 

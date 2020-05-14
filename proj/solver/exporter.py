@@ -4,6 +4,7 @@ from functools import partial
 import networkx as nx
 from .solver_context import SolverContext
 from proj.config import configuration
+from proj.timer import timed
 
 
 def write(output, value='', line_break=True):
@@ -19,7 +20,7 @@ def fl(values, sep=' '):
 def edge_name(e):
   return ''.join(e)
 
-
+@timed('Export to mathprog')
 def export(output, graph, infrastructures, demand, budget):
   """
   Export the solver data in mathprog data format.

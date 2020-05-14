@@ -3,6 +3,7 @@ import logging
 import random
 
 from proj import pulse, configuration
+from proj.timer import timed
 from .solver_context import SolverContext
 
 
@@ -77,6 +78,7 @@ def run_solve(ctx):
   return ctx.best_solution
 
 
+@timed('Solve')
 def solve(graph, infrastructures, demand, budget):
   """
   Runs the algorithm to solve the multi-commodity multi-facility problem

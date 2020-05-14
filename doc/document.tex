@@ -22,30 +22,58 @@
 
     {\rm Joaquín Correa - \today}
   \end{center}
+  \section*{Introducción}
 
-  \section*{Introduccón}
-  Como proyecto de aplicación del algorítmo del Pulso sugiero su utilización al problema de ruteo y decision decision de construccion de ciclovias en una ciudad. Dado una ciudad y un conjunto de puntos orignes y destinos con una demanda asociada.
+  Como proyecto de aplicación del algorítmo del Pulso sugiero su utilización al problema de ruteo y decisión de construcción de ciclovías en una ciudad. Dado una ciudad y un conjunto de puntos orígenes y destinos con una demanda asociada.
 
-  Se utiliza el pulso como método alternativo a la programación matemática, ya que al ser en parte un problema de desicion y por lo tanto un MILP, es sabido que no siempre escala bien con instancias de datos grandes.
+  Se utiliza el pulso como método alternativo a la programación matemática, ya que al ser en parte un problema de decisión y por lo tanto un MILP, es sabido que no siempre escala bien con instancias de datos grandes.
 
-  Finalmente se realiza un comparacion en medida de lo posible con el MILP y se incluye una seccion con caracteristicas propias y mejoras futuras del trabajo.
-  
+  Finalmente se realiza un comparación en medida de lo posible con el MILP y se incluye una sección con características propias y mejoras futuras del trabajo.
+
   \section*{Problema}
-  El problema consiste en decidir dónde construir ciclovias de manera satisfaga las necesidades de los usuarios, representados por la demanda, de la mejor manera. Matemáticamente, el modelo consiste en un grafo dirigido y un conjunto de pares origen-destino donde para cada uno se tiene un valor de demanda (por ejemplo cantidad de personas). Para cada arco del grafo, se tiene un costo de usuario que corresponde al costo percibido por un usuario si lo utiliza para desplazarse y un costo de construcción de diversos tipos de ciclovias. Al construir una ciclovia sobre un arco, el costo de usuario disminuye. Finalmente se tiene un valor de presupuesto que limita la construccion de ciclovias.\\
+  El problema consiste en decidir dónde construir ciclovías de manera satisfaga las necesidades de los usuarios, representados por la demanda, de la mejor manera. Matemáticamente, el modelo consiste en un grafo dirigido y un conjunto de pares origen-destino donde para cada uno se tiene un valor de demanda (por ejemplo cantidad de personas). Para cada arco del grafo, se tiene un costo de usuario que corresponde al costo percibido por un usuario si lo utiliza para desplazarse y un costo de construcción de diversos tipos de ciclovías. Al construir una ciclovía sobre un arco, el costo de usuario disminuye. Finalmente se tiene un valor de presupuesto que limita la construcción de ciclovías.
 
   La formulación matemática se muestra:
 
   \begin{align}
-    \text{min} & \sum_{k \in O} \sum_{i \in I} \sum_{e \in E} x_{ek}^i c_e^i & \\
-    \text{s.t.} & \sum_{i \in I}\sum_{e \in E_n^+} x_{ak}^i - \sum_{i \in I}\sum_{e \in E_n^-} x_{ak}^i = b_{nk} & \forall k \in O, n \in V \\
-          & \sum_{i \in I} y_{e}^i \leq 1 & \forall e \in E \\
-          & \sum_{i \in I} \sum_{e \in E} m_e^i y_e^i \leq B & \\
-          & x_{ek}^i \leq y_e^i  D_k & \forall e \in E, i \in I, k \in O \\
+    \text{min} & \sum_{k \in O} \sum_{i \in I} \sum_{e \in E} x_{ek}^i c_e^i & \label{eq:objective} \\
+    \text{s.t.} & \sum_{i \in I}\sum_{e \in E_n^+} x_{ak}^i - \sum_{i \in I}\sum_{e \in E_n^-} x_{ak}^i = b_{nk} & \forall k \in O, n \in V \label{eq:flowconservation} \\
+          & \sum_{i \in I} y_{e}^i \leq 1 & \forall e \in E \label{eq:onlyoneinfraactive} \\
+          & \sum_{i \in I} \sum_{e \in E} m_e^i y_e^i \leq B & \label{eq:respectbudget} \\
+          & x_{ek}^i \leq y_e^i  D_k & \forall e \in E, i \in I, k \in O \label{eq:restrictflowbyinfras} \\
           & x_{ek}^i \geq 0, y_e^i \in \{0,1\} &
   \end{align}
 
+  Donde:
+  \begin{description}
+    \item[$O$]: Conjunto de pares origen-destino.
+    \item[$I$]: Conjunto de infraestructuras.
+    \item[$G=(V, E)$]: Grafo dirigido, compuesto por el conjunto de vertices $V$ y arcos $E$.
+    \item[$c_e^i$]: Parámetro, costo de usuario de atravesar el arco $e$ utilizando la infraestructura $i$.
+    \item[$b_{nk}$]: Parámetro, valor de la ecuación de conservación del flujo. Vale $D_k$ si $n$ es el origen de $k$, $-D_k$ si es el destino y cero en otro caso.
+    \item[$m_e^i$]: Parámetro, costo de construcción de la infraestructura $i$ sobre el arco $e$.
+    \item[$B$]: Parámetro, valor del presupuesto total de construcción.
+    \item[$x_{ek}^i$]: Es la variable mayor a cero que modela el flujo del par origen-destino $k$, sobre el arco $e$ utilizando la infraestructura $i$.
+    \item[$y_e^i$]: Es la variable binaria que indica si la infraestructura $i$ está activa en el arco $e$.
+  \end{description}
+
+  Y las ecuaciones:
+
+  \begin{description}
+    \item[(\ref{eq:objective})] Objetivo, se minimiza el costo total percibido por el flujo.
+    \item[(\ref{eq:flowconservation})] Restricción de conservación del flujo.
+    \item[(\ref{eq:onlyoneinfraactive})] Restricción que permite solo una infraestructura activa por arco.
+    \item[(\ref{eq:respectbudget})] Restricción de presupuesto.
+    \item[(\ref{eq:restrictflowbyinfras})] Restricción que permite al flujo utilizar la infraestructura activa únicamente.
+  \end{description}
+
+  \subsection*{Dificultades}
+
+  Este problema, asi como fue formulado puede resolverse en un solver para grafos no muy grandes de manera prácticamente conveniente. Pero, al ser en parte un problema de programación entera sabemos es un problema contenido en $NP$, y por lo tanto, todavía, difícil de escalar.
+
   \section*{Aplicación del Pulso}
   
+
   Descripción del algorítmo del pulso.
 
   \subsection*{Caso de estudio}
@@ -55,6 +83,7 @@
   \section*{Resultados}
 
   Comparación de resultados.
+  Comparar ejecución con glpk y cbc.
 
   \section*{Implementacion}
 
