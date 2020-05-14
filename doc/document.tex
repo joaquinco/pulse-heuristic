@@ -3,14 +3,16 @@
   \usepackage[utf8]{inputenc}
   \usepackage[T1]{fontenc}
   \usepackage[spanish]{babel}
-  \usepackage{amstext}
   \usepackage{graphicx}
-  \usepackage{subfigure}
+  \usepackage{amstext}
+  \usepackage{amsmath}
   \usepackage{booktabs}
+  \usepackage{subfigure}
   \usepackage{footnote}
   \usepackage{hyperref}
   \usepackage{algpseudocode,algorithm,algorithmicx}
   \usepackage[font=small,labelfont=bf]{caption}
+
 \begin{document}
   \begin{center}
     {\sc \large Enfoque de pulsos}
@@ -22,5 +24,42 @@
   \end{center}
 
   \section*{Introduccón}
+  Como proyecto de aplicación del algorítmo del Pulso sugiero su utilización al problema de ruteo y decision decision de construccion de ciclovias en una ciudad. Dado una ciudad y un conjunto de puntos orignes y destinos con una demanda asociada.
+
+  Se utiliza el pulso como método alternativo a la programación matemática, ya que al ser en parte un problema de desicion y por lo tanto un MILP, es sabido que no siempre escala bien con instancias de datos grandes.
+
+  Finalmente se realiza un comparacion en medida de lo posible con el MILP y se incluye una seccion con caracteristicas propias y mejoras futuras del trabajo.
   
+  \section*{Problema}
+  El problema consiste en decidir dónde construir ciclovias de manera satisfaga las necesidades de los usuarios, representados por la demanda, de la mejor manera. Matemáticamente, el modelo consiste en un grafo dirigido y un conjunto de pares origen-destino donde para cada uno se tiene un valor de demanda (por ejemplo cantidad de personas). Para cada arco del grafo, se tiene un costo de usuario que corresponde al costo percibido por un usuario si lo utiliza para desplazarse y un costo de construcción de diversos tipos de ciclovias. Al construir una ciclovia sobre un arco, el costo de usuario disminuye. Finalmente se tiene un valor de presupuesto que limita la construccion de ciclovias.\\
+
+  La formulación matemática se muestra:
+
+  \begin{align}
+    \text{min} & \sum_{k \in O} \sum_{i \in I} \sum_{e \in E} x_{ek}^i c_e^i & \\
+    \text{s.t.} & \sum_{i \in I}\sum_{e \in E_n^+} x_{ak}^i - \sum_{i \in I}\sum_{e \in E_n^-} x_{ak}^i = b_{nk} & \forall k \in O, n \in V \\
+          & \sum_{i \in I} y_{e}^i \leq 1 & \forall e \in E \\
+          & \sum_{i \in I} \sum_{e \in E} m_e^i y_e^i \leq B & \\
+          & x_{ek}^i \leq y_e^i  D_k & \forall e \in E, i \in I, k \in O \\
+          & x_{ek}^i \geq 0, y_e^i \in \{0,1\} &
+  \end{align}
+
+  \section*{Aplicación del Pulso}
+  
+  Descripción del algorítmo del pulso.
+
+  \subsection*{Caso de estudio}
+
+  Presentacion del grafo, origenes y destinos.
+
+  \section*{Resultados}
+
+  Comparación de resultados.
+
+  \section*{Implementacion}
+
+  \subsubsection*{Consideraciones}
+
+  Optimizaciones, desiciones de diseño, configuración.
+
 \end{document}
