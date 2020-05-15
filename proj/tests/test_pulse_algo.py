@@ -4,6 +4,7 @@ from functools import partial
 import networkx as nx
 
 from proj.pulse import pulse
+from proj.config import configuration
 from proj.tests.graph_helper import get_simple_graph, get_simple_multigraph
 
 class TestPulseAlgorithm(unittest.TestCase):
@@ -73,6 +74,15 @@ class TestPulseAlgorithm(unittest.TestCase):
     results = [r for r in self.get_multigraph_pulse()]
 
     self.assertGreater(len(results), 0)
+
+  def test_return_best(self):
+    prev = configuration.pulse_return_best
+    configuration.pulse_return_best = True
+
+    results = list(self.get_simple_pulse())
+
+    self.assertEqual(len(results), 1)
+    configuration.pulse_return_best = prev
 
 
 

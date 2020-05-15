@@ -48,7 +48,7 @@
   \begin{description}
     \item[$O$]: Conjunto de pares origen-destino.
     \item[$I$]: Conjunto de infraestructuras.
-    \item[$G=(V, E)$]: Grafo dirigido, compuesto por el conjunto de vertices $V$ y arcos $E$.
+    \item[$G=(V, E)$]: Grafo dirigido, compuesto por el conjunto de vértices $V$ y arcos $E$.
     \item[$c_e^i$]: Parámetro, costo de usuario de atravesar el arco $e$ utilizando la infraestructura $i$.
     \item[$b_{nk}$]: Parámetro, valor de la ecuación de conservación del flujo. Vale $D_k$ si $n$ es el origen de $k$, $-D_k$ si es el destino y cero en otro caso.
     \item[$m_e^i$]: Parámetro, costo de construcción de la infraestructura $i$ sobre el arco $e$.
@@ -67,11 +67,24 @@
     \item[(\ref{eq:restrictflowbyinfras})] Restricción que permite al flujo utilizar la infraestructura activa únicamente.
   \end{description}
 
+  \subsection*{Modelado}
+
+  Se puede notar de la formulación, que si bien el grafo base es un grafo simple, se está trabajando sobre un multigrafo. Cada arco del grafo base es replicado tantas veces como cantidad de infraestructuras hay, y cada replica tiene un costo de usuario y costo de construcción asociado.
+
+  Lo que se busca entonces, son caminos óptimos por este multigrafo, con restricción de presupuesto, que determina para cada par de nodos, que arco se elije, si se elije alguno.
+
   \subsection*{Dificultades}
 
-  Este problema, asi como fue formulado puede resolverse en un solver para grafos no muy grandes de manera prácticamente conveniente. Pero, al ser en parte un problema de programación entera sabemos es un problema contenido en $NP$, y por lo tanto, todavía, difícil de escalar.
+  Este problema, asi como fué formulado puede resolverse en un MILP solver para grafos no muy grandes de manera conveniente. Pero, al ser en parte un problema de programación entera sabemos es un problema contenido en $NP$ y por lo tanto, todavía, difícil de escalar.
+
+  Si particionamos, para el análisis, el problema en dos, por un lado esta la decisión de cuál y dónde construir infraestructura y por otro la de encontrar el camino más corto para cada par origen-destino. Obviamente estos subproblemas no pueden ser tratados por separado en este caso. La primera partición del problema es la difícil, la segunda, vista de manera aislada es un problema \it{facil}. El flujo entre dos pares origen destino no esta relacionado con otros flujos, ni los arcos tienen capacidad. Por lo tanto, la segunda partición es simplemente el problema del camino mas corto entre dos puntos, repetido $card(O)$ veces. Lo que se busca en este trabajo, es utilizar el pulso para resolver ambos problemas al mismo tiempo.
 
   \section*{Aplicación del Pulso}
+
+
+
+  TODO: parrafo en que se explica la complejidad de que hayan varios od.
+  Supongamos, para simplificar, que tenemos un único par origen-destino.
   
 
   Descripción del algorítmo del pulso.

@@ -6,8 +6,9 @@ from .pulse import Pulse
 from .pulse_context import PulseContext
 from proj.config import configuration
 
+
 def _initialize_pulse(
-  graph, source, target, weight='weight', constraints=None, primal_bound=None):
+  graph, source, target, weight, constraints=None, primal_bound=None):
   """
   Initialization phase of pulse algorithm
   """
@@ -41,7 +42,7 @@ def _log_stats(context, current=None):
     'Active pulses: {total_pulses}, nodes reached: {nodes_reached}, total nodes: {total_nodes}'.format(**stats)
   )
 
-def pulse(graph, *args, **kwargs):
+def _pulse(graph, *args, **kwargs):
   """
   Compute shortest path using pulse algorithm
 
@@ -110,10 +111,28 @@ def pulse(graph, *args, **kwargs):
       context.save_pulse(candidate_pulse)
 
       if adjacent == context.target:
-        # TODO: since yielding every path can end up in exponential space search,
-        # it might be better to just return the best.
-        # TODO: this can be also enforced buy giving a primal_bound that is low
-        # enough
         _log_stats(context)
         yield candidate_pulse.to_path(), dict(candidate_pulse.weights)
 
+
+def pulse(*args, **kwargs):
+  """
+  Calls pulse algorithm.
+
+  If return best only is enabled, then returns the best.
+  """
+  weight_key = kwargs.get('weight')
+
+  pulses_generator = _pulse(*args, **kwargs)
+
+  if not configuration.pulse_return_best:
+    return pulses_generator
+
+  best = None
+  best_cost = None
+  for pulse, weights in pulses_generator:
+    if best is None or best_cost > weights.get(weight_key):
+      best_cost = weights.get(weight_key)
+      best = pulse, weights
+
+  return [best]

@@ -26,7 +26,6 @@ class PulseContext(Context):
     self.graph = graph
     self.constraints = constraints
     self.best_cost = best_cost or infinite
-    self.best_cost_fixed = bool(best_cost)
     self.pulses_by_node = {}
     self.nodes_reached = set()
     self.total_pulses = 0
@@ -117,7 +116,7 @@ class PulseContext(Context):
     # Update best cost if needed
     is_target = self.target == pulse.node
     pulse_cost = pulse.weights[self.cost_weight]
-    if is_target and pulse_cost < self.best_cost and not self.best_cost_fixed:
+    if is_target and pulse_cost < self.best_cost:
       self.best_cost = pulse_cost
 
 

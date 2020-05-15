@@ -17,6 +17,8 @@ defaults = dict(
   pulse_primal_bound_factor=1,
   # On each Pulse iteration, ignore adjacents whose cost_bound is higher that current node.
   pulse_discard_faraway_nodes=False,
+  # If pulse returns the best pulse, or just the first found. Note that how good is the first found approach can be tunned with pulse_primal_bound_factor.
+  pulse_return_best=False,
   # Number of times to run the recursive search
   max_iter=10,
   # Per od paths to consider, each recursive search will generate at most solutions_per_od ** od_count paths
