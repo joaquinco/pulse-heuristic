@@ -91,10 +91,22 @@
 
   \subsection*{Consideraciones}
 
-  Optimizaciones, decisiones de diseño, configuración.
-  Describir variantes de la forma de ejecutar el solve. Elegir algunas variantes que seran comparadas abajo.
+  Se implementó una versión del pulso simple que incluye las siguientes características:
+
+  \begin{description}
+    \item[Poda por costo]: {se corre inicialmente un Dijkstra sobre el reverso del grafo, para obtener una cota inferior del costo desde cada nodo al nodo objetivo. Luego se utiliza esta información para realizar la poda por costo.}
+    \item[Poda por infactibilidad]: {se corre, para cada restricción, un dijkstra sobre el grafo reverso tomando dicha restricción como el costo. De esta forma obtenemos un valor mínimo de cada restricción requerido para llegar al nodo destino.}
+    \item[Poda por dominancia]: {cuando un pulso llega a un nodo, se verifica que dicho pulso no esté dominado por algún otro pulso que ya se encuentre en el nodo.}
+    \item[Cola de pulsos]: {En cada iteración, el pulso elegido es el que tiene menor costo proyectado. Es decir, cuyo costo actual mas la cota inferior del costo en el nodo, es menor.}
+  \end{description}
+
+  \subsection*{Modos de ejecución}
+
+  El algoritmo requiere cuatro parámetros en su forma mas básica: el grafo, las restricciones y los nodos origen y destino. Se implementó de manera que sea mas bien un generador de caminos entre los nodos origen y destino. Para limitar la cantidad de caminos generados se puede puede incluir un parámetro que indica el costo máximo que deben tener los caminos generados y también existe la posibilidad de que devuelva unicamente el mejor. Estos últimos parámetros son de utilidad ya que la complejidad de buscar la mejor solución es mucho mayor que buscar una solución suficientemente buena, como se describirá en la sección de resultados.
 
   \section*{Casos de estudio}
+
+  En esta sección se comparan los tiempos y las variables obtenidas de la ejecución del solver GLPK y el pulso. El pulso será ejecutado en varias configuraciones: $P_B$ será el pulso que busca la mejor solución y $P_S$ será el pulso donde se fuerza a encontrar una solución que sea tan buena como el costo del camino más corto sobre el grafo base multiplicado por $S$. Por ejemplo $P_{0.9}$ buscará soluciones que mejoren en un $10\%$ el costo del camino más corto.
 
   \subsection*{Ciudad Vieja}
 
