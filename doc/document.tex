@@ -22,18 +22,16 @@
 
     {\rm Joaquín Correa - \today}
   \end{center}
+
   \section*{Introducción}
 
-  Como proyecto de aplicación del algorítmo del Pulso sugiero su utilización al problema de ruteo y decisión de construcción de ciclovías en una ciudad. Dado una ciudad y un conjunto de puntos orígenes y destinos con una demanda asociada.
-
-  Se utiliza el pulso como método alternativo a la programación matemática, ya que al ser en parte un problema de decisión y por lo tanto un MILP, es sabido que no siempre escala bien con instancias de datos grandes.
-
-  Finalmente se realiza un comparación en medida de lo posible con el MILP y se incluye una sección con características propias y mejoras futuras del trabajo.
+  Como proyecto de aplicación del algorítmo del Pulso propongo su aplicación al problema de ruteo de demanda y decisión de construcción de ciclovías en una ciudad, puede ser visto como una versión del problema de distribución de mercancías, sobre una red que puede ser mejorada mediante la construcción de instalaciones que mejoren la distribución. Utilizo el pulso como método alternativo a la programación matemática con el objetivo de escalar mejor en el tamaño de las instancias atacables, aunque con esto se pueda perder la exactitud de la solución, es decir lo utilizo como heurístca. Finalmente realizo un comparación en medida de lo posible con el MILP que resuelve el problema exacto e incluyo una sección con características propias y trabajo futuro.
 
   \section*{Problema}
-  El problema consiste en decidir dónde construir ciclovías de manera satisfaga las necesidades de los usuarios, representados por la demanda, de la mejor manera. Matemáticamente, el modelo consiste en un grafo dirigido y un conjunto de pares origen-destino donde para cada uno se tiene un valor de demanda (por ejemplo cantidad de personas). Para cada arco del grafo, se tiene un costo de usuario que corresponde al costo percibido por un usuario si lo utiliza para desplazarse y un costo de construcción de diversos tipos de ciclovías. Al construir una ciclovía sobre un arco, el costo de usuario disminuye. Finalmente se tiene un valor de presupuesto que limita la construcción de ciclovías.
 
-  La formulación matemática se muestra:
+  El problema consiste en decidir dónde construir ciclovías de manera que satisfaga las necesidades de los usuarios, representados por la demanda, de la mejor manera. Matemáticamente, el modelo consiste en un grafo dirigido y un conjunto de pares origen-destino donde para cada uno se tiene un valor de demanda (por ejemplo cantidad de personas). Para cada arco del grafo, se tiene un costo de usuario que corresponde al costo percibido por un usuario si lo utiliza para desplazarse y un costo de construcción de diversos tipos de ciclovías. Al construir una ciclovía sobre un arco, el costo de usuario disminuye. Finalmente se tiene un valor de presupuesto que limita la construcción de ciclovías.
+
+  La formulación matemática es la siguiente:
 
   \begin{align}
     \text{min} & \sum_{k \in O} \sum_{i \in I} \sum_{e \in E} x_{ek}^i c_e^i & \label{eq:objective} \\
@@ -53,7 +51,7 @@
     \item[$b_{nk}$]: Parámetro, valor de la ecuación de conservación del flujo. Vale $D_k$ si $n$ es el origen de $k$, $-D_k$ si es el destino y cero en otro caso.
     \item[$m_e^i$]: Parámetro, costo de construcción de la infraestructura $i$ sobre el arco $e$.
     \item[$B$]: Parámetro, valor del presupuesto total de construcción.
-    \item[$x_{ek}^i$]: Es la variable mayor a cero que modela el flujo del par origen-destino $k$, sobre el arco $e$ utilizando la infraestructura $i$.
+    \item[$x_{ek}^i$]: Es la variable que modela el flujo de demanda del par origen-destino $k$, sobre el arco $e$ utilizando la infraestructura $i$.
     \item[$y_e^i$]: Es la variable binaria que indica si la infraestructura $i$ está activa en el arco $e$.
   \end{description}
 
@@ -69,39 +67,48 @@
 
   \subsection*{Modelado}
 
-  Se puede notar de la formulación, que si bien el grafo base es un grafo simple, se está trabajando sobre un multigrafo. Cada arco del grafo base es replicado tantas veces como cantidad de infraestructuras hay, y cada replica tiene un costo de usuario y costo de construcción asociado.
+  Se puede observar de la formulación, que si bien el grafo base es un grafo simple, se está trabajando sobre un multigrafo. Cada arco del grafo base es replicado tantas veces como cantidad de infraestructuras hay y cada replica tiene un costo de usuario y costo de construcción asociado.
 
-  Lo que se busca entonces, son caminos óptimos por este multigrafo, con restricción de presupuesto, que determina para cada par de nodos, que arco se elije, si se elije alguno.
+  Lo que se busca son caminos óptimos por este multigrafo, con restricción de presupuesto, que determina para cada par de nodos, qué arco se elije, si se elije alguno. Notar que si se activa la infraestructura $i$ en el arco $e$, esta puede ser usada por cualquiera de los flujos entre pares origen-destino.
+
+  Una cosa que no esta representada en el modelo, pero que se desprende de la realidad, es que siempre habrá una solución factible. Esto es debido a que se toma el grafo base como una de las infraestructuras cuyo costo de construcción es cero.
 
   \subsection*{Dificultades}
 
   Este problema, asi como fué formulado puede resolverse en un MILP solver para grafos no muy grandes de manera conveniente. Pero, al ser en parte un problema de programación entera sabemos es un problema contenido en $NP$ y por lo tanto, todavía, difícil de escalar.
 
-  Si particionamos, para el análisis, el problema en dos, por un lado esta la decisión de cuál y dónde construir infraestructura y por otro la de encontrar el camino más corto para cada par origen-destino. Obviamente estos subproblemas no pueden ser tratados por separado en este caso. La primera partición del problema es la difícil, la segunda, vista de manera aislada es un problema \it{facil}. El flujo entre dos pares origen destino no esta relacionado con otros flujos, ni los arcos tienen capacidad. Por lo tanto, la segunda partición es simplemente el problema del camino mas corto entre dos puntos, repetido $card(O)$ veces. Lo que se busca en este trabajo, es utilizar el pulso para resolver ambos problemas al mismo tiempo.
+  Particionando el problema en dos, con el solo objetivo de analizarlo, por un lado esta la decisión de cuál y dónde construir infraestructura y por otro la de encontrar el camino más corto para cada par origen-destino. La primera partición del problema es la difícil, la segunda, vista de manera aislada es un problema {\it fácil}: el flujo entre dos pares origen destino no esta relacionado con otros flujos, ni los arcos tienen capacidad. Por lo tanto, la segunda partición es simplemente el problema del camino mas corto entre dos puntos, repetido $card(O)$ veces. Lo que se busca en este trabajo, es utilizar el pulso para resolver ambos problemas al mismo tiempo.
 
   \section*{Aplicación del Pulso}
 
+  Supongamos para simplificar, que tenemos un único par origen-destino. Debemos encontrar la asignación de infraestructuras a arcos que hagan mejor uso del presupuesto $B$. Si modelamos el grafo con infraestructuras como un multigrafo, esto se puede resolver como un problema de camino más corto con restricciónes o weighted-constrained shortest-path. Aquí es donde entra el algorítmo del Pulso.
 
+  Es de suponer, que en la simplificación de un único par origen-destino, el pulso, o cualquier algorítmo exacto para el WCSP debe encontrar la mejor solución, la misma que encontraría el MILP solver. Ahora, si consideramos mas de un par origen-destino la cosa cambia.
 
-  TODO: parrafo en que se explica la complejidad de que hayan varios od.
-  Supongamos, para simplificar, que tenemos un único par origen-destino.
-  
+  Si bien los pares origen-destino son independientes, la red subyacente es común, y el hecho de que una infraestructura esté activa o no en cierto arco puede determinar el camino mas corto entre varios pares origen-destino. Supongamos que se toma un par origen-destino y se ejecuta el pulso con cierta restricción de presupuesto. Luego se toma el siguiente par origen-destino y se ejecuta el pulso, con cierta restricción de presupuesto, si es que aún queda, y sobre el multigrafo luego de aplicar las infraestructuras que el pulso eligió para el primer par origen-destino. Se puede continuar este proceso iterativo hasta quedarse sin pares origen-destino. El hecho de quedarse sin presupuesto no afecta en lo mas mínimo, debido a que siempre habrán caminos cuyos costo de construcción sean cero. A grandes rasgos, este fue el camino que se siguió.
 
-  Descripción del algorítmo del pulso.
+  Lo que queda por definir es la asignación de presupuesto para cada ejecución del pulso. Se decidió asignar a cada origen-destino la proporción de presupuesto relativa a la demanda de dicho par sobre el total, es decir: el presupuesto del par $k$ es $B_k = B  {D_k \over \sum_{s \in O} D_s}$.
 
-  \subsection*{Caso de estudio}
+  \subsection*{Consideraciones}
 
-  Presentacion del grafo, origenes y destinos.
+  Optimizaciones, decisiones de diseño, configuración.
+  Describir variantes de la forma de ejecutar el solve. Elegir algunas variantes que seran comparadas abajo.
 
-  \section*{Resultados}
+  \section*{Casos de estudio}
+
+  \subsection*{Ciudad Vieja}
+
+  El primer nivel de comparación y ejecución del modelo se realizó con un grafo que representa aproximadamente\footnote{Se generó a partir de información de cruces de calles} el barrio Ciudad Vieja de Montevideo. En este grafo todas las calles van en ambas direcciones. Cuenta con 204 nodos y 734 arcos y su antiestética representación esta en la figura.
+
+  \begin{figure}[]
+    \centering
+    \includegraphics[width=6cm]{imgs/mdeo_med.png}
+    \caption{Grafo de Ciudad Vieja}
+    \label{ciudadvieja}
+  \end{figure}
 
   Comparación de resultados.
   Comparar ejecución con glpk y cbc.
 
   \section*{Implementacion}
-
-  \subsubsection*{Consideraciones}
-
-  Optimizaciones, desiciones de diseño, configuración.
-
 \end{document}
