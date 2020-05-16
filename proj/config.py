@@ -42,7 +42,7 @@ class Config(Context):
 configuration = Config()
 
 
-def recreate_configuration(**kwargs):
+def update_configuration(**kwargs):
   global configuration
 
-  configuration = Config(**kwargs)
+  configuration.update(**kwargs)
