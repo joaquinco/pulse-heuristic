@@ -30,7 +30,7 @@ defaults = dict(
   od_budget_epsilon=0,
   # Minimum raw infrastructure length, except for base infrastructure
   # TODO: minimum_infra_length=3,
-  # Random initial seed
+  # Random initializer seed
   seed=129,
 )
 
