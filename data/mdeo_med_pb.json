@@ -6,10 +6,10 @@
   },
   "budget": 15000,
   "demand": [
-    { "source": "14880", "target": "87", "value": 500 },
-    { "source": "6933", "target": "16825", "value": 50 },
-    { "source": "6988", "target": "11437", "value": 100 },
-    { "source": "16108", "target": "6987", "value": 350 }
+    { "source": "15155", "target": "7884", "value": 500 },
+    { "source": "7310", "target": "15195", "value": 50 },
+    { "source": "15239", "target": "7626", "value": 100 },
+    { "source": "8867", "target": "12671", "value": 350 }
   ],
   "config": {
     "arc_weight_key": "weight",
