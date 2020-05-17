@@ -60,8 +60,10 @@ class TestPulseAlgorithm(unittest.TestCase):
   def test_all_results_found(self):
     results = [r for r in self.get_simple_pulse()]
 
-    # 2 is the known number of paths from s to t
-    self.assertEqual(len(results), 2)
+    # 2 is the known number of paths from s to t,
+    # but since pulse will update the best cost after finding one,
+    # it-ll return 1
+    self.assertEqual(len(results), 1)
 
   def test_best_results_found(self):
     # 8 is the known shortest path cost and is satisfied by a single path
