@@ -38,13 +38,15 @@ def main():
   Running params:
   input: {args.config_file}
   demand: \n{pp.pformat(data.demand, indent=4)}
+  infras: \n{pp.pformat(data.infrastructures, indent=5)}
   budget: {data.budget}
   nodes: {data.graph.number_of_nodes()}
   edges: {data.graph.number_of_edges()}
   config: \n{pp.pformat(configuration, indent=4)}
       """
     )
-    solve(*arguments)
+    solution = solve(*arguments)
+    solution.print()
 
 
 main()
