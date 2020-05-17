@@ -1,0 +1,22 @@
+{
+  "graph": "data/mdeo_med.yml",
+  "infrastructures": {
+    "cost_factors": [0.9, 0.5, 0.4],
+    "construction_cost_factors": [1, 4, 8]
+  },
+  "budget": 15000,
+  "demand": [
+    { "source": "15155", "target": "7884", "value": 500 },
+    { "source": "7310", "target": "15195", "value": 50 },
+    { "source": "15239", "target": "7626", "value": 100 },
+    { "source": "8867", "target": "12671", "value": 350 }
+  ],
+  "config": {
+    "arc_weight_key": "weight",
+    "max_iter": 1,
+    "solutions_per_od": 4,
+    "pulse_primal_bound_factor": 0.97,
+    "pulse_discard_faraway_nodes": true,
+    "pulse_discard_faraway_delta": 0
+  }
+}
