@@ -6,10 +6,9 @@ Datasets corresponding of a subgraph of the Montevideo city. Graph are directed.
 ## Medium
 
 Nodes: 204
-Edges: 734 
+Edges: 770 
 
 ## Large
 
 Nodes: 3895
-Edges: 14142
-
+Edges: 15286
