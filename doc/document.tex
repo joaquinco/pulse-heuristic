@@ -89,7 +89,7 @@
 
   Lo que queda por definir es la asignación de presupuesto para cada ejecución del pulso. Se decidió asignar a cada origen-destino la proporción de presupuesto relativa a la demanda de dicho par sobre el total, es decir: el presupuesto del par $k$ es $B_k = B  {D_k \over \sum_{s \in O} D_s}$.
 
-  \subsection*{Consideraciones}
+  \subsection*{Consideraciones del pulso}
 
   Se implementó una versión del pulso simple que incluye las siguientes características:
 
@@ -102,14 +102,19 @@
 
   \subsection*{Modos de ejecución}
 
-  El algoritmo requiere cuatro parámetros en su forma mas básica: el grafo, las restricciones y los nodos origen y destino. Se implementó de manera que sea mas bien un generador de caminos entre los nodos origen y destino. Para limitar la cantidad de caminos generados se puede puede incluir un parámetro que indica el costo máximo que deben tener los caminos generados y también existe la posibilidad de que devuelva unicamente el mejor. Estos últimos parámetros son de utilidad ya que la complejidad de buscar la mejor solución es mucho mayor que buscar una solución suficientemente buena, como se describirá en la sección de resultados.
+  El algoritmo del pulso requiere cuatro parámetros en su forma mas básica: el grafo, las restricciones y los nodos origen y destino. Se implementó de manera que sea mas bien un generador de caminos entre los nodos origen y destino. Para limitar la cantidad de caminos generados se puede puede incluir un parámetro que indica el costo máximo que deben tener los caminos generados y también existe la posibilidad de que devuelva unicamente el mejor. Estos últimos parámetros son de utilidad ya que la complejidad de buscar la mejor solución es mucho mayor que buscar una solución suficientemente buena, como se describirá en la sección de resultados.
 
   \subsection*{Otras opciones}
 
   \begin{description}
     \item[Descartar nodos mas lejanos]: Booleano, por defecto falso. Durante la ejecución del pulso, no considera nodos cuya cota mínima de costo sea mayor a la del pulso corriente. Esto puede ser deseado o no dependiendo del conjunto de datos.
     \item[Delta de descarte de nodos mas lejanos]: Numero, valor de la diferencia a prtir del cual se descartan nodos mas lejanos. También puede ser usado para forzar la elecciones de nodos mas cercanos, si se utiliza un valor negativo.
+    \item[Soluciones por par origen-destino]: 
   \end{description}
+
+  \subsection*{Consideraciones del solver implementado}
+
+  El algoritmo que soluciona el problema, llamemoslo {\it Pulse solver}, se implementó como un algoritmo recursivo que en cada paso recursivo selecciona un par origen destino, corre el pulso y para cada camino generado, lo aplica al grafo, llama al paso recursivo y luego vuelve el grafo a su estado inicial. El solver puede tener una cantidad exponencial (en la cantidad de pares origen-destino) de pasos recursivos, si el pulso genera muchos caminos en cada paso. Por eso necesario que cada camino generado por el pulso sea lo mejor posible. Más allá de los caminos que pueda generar el pulso en cada paso, se puede limitar la cantidad considerada con un parámetro del programa.
 
   \section*{Casos de estudio}
 
@@ -117,7 +122,7 @@
 
   \subsection*{Ciudad Vieja}
 
-  El primer nivel de comparación y ejecución del modelo se realizó con un grafo que representa aproximadamente\footnote{Se generó a partir de información de cruces de calles} el barrio Ciudad Vieja de Montevideo. En este grafo todas las calles van en ambas direcciones. Cuenta con 204 nodos y 734 arcos y su inexacta representación esta en la figura.
+  El primer nivel de comparación y ejecución del modelo se realizó con un grafo que representa aproximadamente\footnote{Se generó a partir de información de cruces de calles} el barrio Ciudad Vieja de Montevideo. En este grafo todas las calles van en ambas direcciones. Cuenta con 204 nodos y 770 arcos y su inexacta representación esta en la figura.
 
   \begin{figure}[]
     \centering
