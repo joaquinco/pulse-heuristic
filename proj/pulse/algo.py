@@ -88,8 +88,9 @@ def _pulse(graph, *args, **kwargs):
         continue
 
       if configuration.pulse_discard_faraway_nodes \
-        and context.get_cost_bound(current.node) < context.get_cost_bound(adjacent):
-        # Ignore adjacent whose lower bound cost is greater than current
+        and (context.get_cost_bound(adjacent) - context.get_cost_bound(current.node) >= \
+          configuration.pulse_discard_faraway_delta):
+        # Ignore adjacent whose lower bound cost plus delta is greater than current
         continue
 
       edge_weights = graph.edges[edge]

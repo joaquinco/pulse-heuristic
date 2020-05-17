@@ -104,13 +104,20 @@
 
   El algoritmo requiere cuatro parámetros en su forma mas básica: el grafo, las restricciones y los nodos origen y destino. Se implementó de manera que sea mas bien un generador de caminos entre los nodos origen y destino. Para limitar la cantidad de caminos generados se puede puede incluir un parámetro que indica el costo máximo que deben tener los caminos generados y también existe la posibilidad de que devuelva unicamente el mejor. Estos últimos parámetros son de utilidad ya que la complejidad de buscar la mejor solución es mucho mayor que buscar una solución suficientemente buena, como se describirá en la sección de resultados.
 
+  \subsection*{Otras opciones}
+
+  \begin{description}
+    \item[Descartar nodos mas lejanos]: Booleano, por defecto falso. Durante la ejecución del pulso, no considera nodos cuya cota mínima de costo sea mayor a la del pulso corriente. Esto puede ser deseado o no dependiendo del conjunto de datos.
+    \item[Delta de descarte de nodos mas lejanos]: Numero, valor de la diferencia a prtir del cual se descartan nodos mas lejanos. // TODO: Hay que implementarlo 
+  \end{description}
+
   \section*{Casos de estudio}
 
   En esta sección se comparan los tiempos y las variables obtenidas de la ejecución del solver GLPK y el pulso. El pulso será ejecutado en varias configuraciones: $P_B$ será el pulso que busca la mejor solución y $P_S$ será el pulso donde se fuerza a encontrar una solución que sea tan buena como el costo del camino más corto sobre el grafo base multiplicado por $S$. Por ejemplo $P_{0.9}$ buscará soluciones que mejoren en un $10\%$ el costo del camino más corto.
 
   \subsection*{Ciudad Vieja}
 
-  El primer nivel de comparación y ejecución del modelo se realizó con un grafo que representa aproximadamente\footnote{Se generó a partir de información de cruces de calles} el barrio Ciudad Vieja de Montevideo. En este grafo todas las calles van en ambas direcciones. Cuenta con 204 nodos y 734 arcos y su antiestética representación esta en la figura.
+  El primer nivel de comparación y ejecución del modelo se realizó con un grafo que representa aproximadamente\footnote{Se generó a partir de información de cruces de calles} el barrio Ciudad Vieja de Montevideo. En este grafo todas las calles van en ambas direcciones. Cuenta con 204 nodos y 734 arcos y su inexacta representación esta en la figura.
 
   \begin{figure}[]
     \centering
@@ -122,5 +129,16 @@
   Comparación de resultados.
   Comparar ejecución con glpk y cbc.
 
-  \section*{Implementacion}
+  \section*{Implementación}
+
+  \section*{Trabajo futuro}
+
+  \subsection*{Forzar mejores soluciones por par origen-destino}
+
+  El parámetro para configurar la ganancia sobre el costo base por par origen-destino debería ser configurado para cada par. El problema con la forma de dividir el presupuesto es que pueden haber pares origen-destino con muy poca demanda relativa al total, que por lo tanto no logran un asignación de presupuesto que permita obtener la ganancia impuesta por el parámetro. Esto puede causar que no exista solución para algún par origen-destino, lo que causa un infructuso y largo tiempo de ejecución.
+
+  \subsection*{Mejorar poda por costo}
+
+  La poda por costo puede ser mejorada de de manera que se poden pulsos mas tempranamente. La poda actual solo considera la cota mínima del costo para obtener un costo mínimo proyectado hasta el destino. Sin embargo, este costo mínimo puede que sea inalcanzable debido a que los recursos que requiere no son factibles al sumarlos al pulso que se compara.
+
 \end{document}
