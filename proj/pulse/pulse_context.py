@@ -4,8 +4,8 @@ from proj.constants import infinite
 from proj.context import Context
 from proj.cache import cached_property
 from proj.timer import timed
+from proj.sorted import BinaryTree
 from .pulse import Pulse
-from ..sorted import BinaryTree
 
 class PulseContext(Context):
   def __init__(
@@ -155,9 +155,9 @@ class PulseContext(Context):
     Pop a pulse from the queue. Also removes it from the node.
     """
     while True:
-      pulse = self.pulses.pop()
-
-      if not pulse:
+      try:
+        pulse = self.pulses.pop()
+      except IndexError:
         return None
 
       if pulse.dominated:

@@ -28,6 +28,7 @@ def _find_lower(node):
 
   return current
 
+
 def _insert_node(root, node):
   """
   Iterative inserts a node in the tree
@@ -68,6 +69,8 @@ class Node(object):
       if self.parent:
         self.parent.left = self.right
         self.right.parent = self.parent
+      else:
+        self.right.parent = None
     elif self.parent:
       ret = self.parent
       self.parent.left = None
@@ -132,7 +135,7 @@ class BinaryTree(object):
     Pops the lower element from the tree
     """
     if not self.first:
-      return None
+      raise IndexError
 
     ret = self.first.elem
 
@@ -151,3 +154,4 @@ class BinaryTree(object):
 
   def __repr__(self):
     return f'<BinaryTree len={len(self)} first={self.first}>'
+

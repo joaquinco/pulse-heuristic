@@ -27,4 +27,16 @@ class TestAVL(unittest.TestCase):
     for i in range(len(elements)):
       self.assertEqual(sorted_elements[i], self.instance.pop())
 
+  def test_popall_and_read(self):
+    self.instance.add(10, 20, 1, 30)
 
+    for _ in range(10):
+      try:
+        self.instance.pop()
+      except IndexError:
+        break
+
+    unique = 0.6
+    self.instance.add(unique)
+    self.assertEqual(len(self.instance), 1)
+    self.assertEqual(self.instance.pop(), unique)
