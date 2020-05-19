@@ -67,12 +67,13 @@ def run_solve(ctx):
   Run metaheristic
   """
   odpairs = list(ctx.demand)
-  random.shuffle(odpairs)
+  logging.info(f'Base primal bound per od {ctx.base_primal_bound}')
 
   for iter in range(1, configuration.max_iter + 1):
+    random.shuffle(odpairs)
     logging.debug('Main iteration {}, ods: {}'.format(iter, odpairs))
-    ctx.odpairs = odpairs
 
+    ctx.odpairs = odpairs
     run_solve_search(ctx, 0)
 
   return ctx.best_solution

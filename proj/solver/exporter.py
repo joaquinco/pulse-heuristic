@@ -18,7 +18,7 @@ def fl(values, sep=' '):
 
 
 def edge_name(e):
-  return ''.join(e)
+  return '_'.join(e)
 
 @timed('Export to mathprog')
 def export(output, graph, infrastructures, demand, budget):

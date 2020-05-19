@@ -154,4 +154,3 @@ class BinaryTree(object):
 
   def __repr__(self):
     return f'<BinaryTree len={len(self)} first={self.first}>'
-
