@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+	echo "Must provide one file"
+	exit 1
+fi
+
+cbc exact/model.mod%$1 -solve -gsolu $1.cbc.sol | tee $1.cbc.log

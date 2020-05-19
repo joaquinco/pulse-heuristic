@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+	echo "Must provide one file"
+	exit 1
+fi
+
+glpsol --cuts -m exact/model.mod -d $1 -o $1.glpk.sol | tee $1.glpk.log

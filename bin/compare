@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+  echo "Must provide at least one input file"
+  exit 1
+fi
+
+run_pulse() {
+  echo "Running pulse solve for $1$"
+  time ./bin/run $1 &> $1.solve.log &
+}
+
+run_glpk() {
+  echo "Running glpk for $1$"
+  ./bin/run $1 -a export > $1.dat
+  time glpsol -m exact/model.mod -d $1.dat -o $1.glpk.out --log $1.glpk.log > /dev/null &
+}
+
+#run_glpk $1
+#glpk_pid=$!
+
+for entry in $@; do
+    run_pulse $entry
+    pids[${i}]=$!
+done
+
+#wait $glpk_pid
+for pid in ${pids[*]}; do
+    wait $pid
+done
