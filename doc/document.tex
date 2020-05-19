@@ -118,7 +118,9 @@
 
   \section*{Casos de estudio}
 
-  En esta sección se comparan los tiempos y las variables obtenidas de la ejecución del solver GLPK y el pulso. El pulso será ejecutado en varias configuraciones: $P_B$ será el pulso que busca la mejor solución y $P_S$ será el pulso donde se fuerza a encontrar una solución que sea tan buena como el costo del camino más corto sobre el grafo base multiplicado por $S$. Por ejemplo $P_{0.9}$ buscará soluciones que mejoren en un $10\%$ el costo del camino más corto.
+  En esta sección se comparan los tiempos y las variables obtenidas de la ejecución de los solvers GLPK\footnote{Gnu Linear Programing Kit} y CBC\footnote{Coin-or branch and cut} y el pulso solver. El último será ejecutado en varias configuraciones: $P_S$ será el pulso donde se fuerza a encontrar una solución que sea tan buena como el costo del camino más corto sobre el grafo base multiplicado por $S$. Por ejemplo $P_{0.9}$ buscará soluciones que mejoren en un $10\%$ el costo del camino más corto.
+
+  Los MILP solvers son ejecutados con la opcion de utilizar métodos de Cutting-Plane, lo que mejora mucho su tiempo de ejecución frente al Branch and Cut.
 
   \subsection*{Ciudad Vieja}
 
@@ -127,12 +129,68 @@
   \begin{figure}[]
     \centering
     \includegraphics[width=6cm]{imgs/mdeo_med.png}
-    \caption{Grafo de Ciudad Vieja}
+    \caption{Grafo de Ciudad Vieja, 204 nodos y 770 arcos.}
     \label{ciudadvieja}
   \end{figure}
 
-  Comparación de resultados.
-  Comparar ejecución con glpk y cbc.
+  Para este caso de prueba, se eligieron cuatro pares origen destino y un presupuesto de 15000. En la tabla \ref{table:odsciudadvieja} se pueden observar los pares origen-destino elegido y el costo del camino mas corto sobre el grafo base. El valor objetivo en el grafo base es de 1.496.098,44.
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{ccc}
+      \toprule
+      Par OD & Demanda & Mejor costo base \\
+      \midrule
+      0 & 500 & 1585,97 \\
+      1 & 50 & 1078,17 \\
+      2 & 100 & 713,04 \\
+      3 & 250 & 1651,14 \\
+      \bottomrule
+    \end{tabular}
+    \caption{Resumen de infraestructuras consideradas en para Ciudad Vieja.}\label{table:odsciudadvieja}
+  \end{table}
+  
+  Ademas, se especificaron tres infraestructuras a construir, que junto a la infraestructura base quedan en cuatro. Los factores de mejora sobre el costo de usuario se especifican en la tabla \ref{table:infrasciudadvieja}.
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{ccc}
+      \toprule
+      Infrastructura & Costo de usario & Costo de construcción \\
+      \midrule
+      base & l & l \\
+      0 & 0.9l & l \\
+      1 & 0.5l & 4l \\
+      2 & 0.4l & 8l \\
+      \bottomrule
+    \end{tabular}
+    \caption{Resumen de infraestructuras consideradas en para Ciudad Vieja.}\label{table:infrasciudadvieja}
+  \end{table}
+
+  Utilizando ambos MILP solvers se pudo obtener una solución en poco tiempo. Por otra parte el pulse solver requirió de muchas pruebas hasta llegar a una configuración que sea encontrada de manera aceptablemente rápida y lo mejor posible. Si utilizamos la configuración para buscar el mejor camino, entonces el tiempo de ejecución del pulse solver se dispara indefinidamente. Por otra parte se probó $P0.9$ que también resultó en un tiempo de ejecución excesivo, esta vez debido a que no es posible encontrar una solución que mejore en un $10\%$ el camino mas corto de uno de los pares origen-destino ya que su demanda es muy baja y por lo tanto el presupuesto asignado es insuficiente para lograr esta mejora. En la tabla \ref{table:resultadosciudadvieja} se muestra un breve resumen de los tiempos de ejecución y los valores objetivos. Luego en la figura \ref{resultadosciudadvieja}: referencia figura se muestran las decisiones tomadas por cada solver en el grafo.
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{cccc}
+      \toprule
+      Solver & Tiempo ejecución (s) & Valor objetivo & Presupuesto \\
+      \midrule
+      GLPK & 94,5 & 763589,7502 & 14997.77 \\
+      CBC & 41,33 & 763589,7502 & - \\
+      Pulse & 182,24 & 942412,8526 & 14995.47 \\
+      \bottomrule
+    \end{tabular}
+    \caption{Resumen de ejecución para el grafo de Ciudad Vieja.}\label{table:resultadosciudadvieja}
+  \end{table}
+
+  \begin{figure}[]
+    \centering
+    \includegraphics[width=6cm]{imgs/mdeo_med_glpk.png}
+    \includegraphics[width=6cm]{imgs/mdeo_med_pulse.png}
+    \caption{A la izquierda las infraestructuras construidas por GLPK. A la derecha las construidas por el pulse solver. Los colores de las infraestructuras son: gris, verde, rojo y azul respectivamente al orden en que fueron definidas.}
+    \label{resultadosciudadvieja}
+  \end{figure}
+
 
   \section*{Implementación}
 

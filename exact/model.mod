@@ -54,4 +54,23 @@ subject to respect_budget: sum{e in edges, i in infras} y[e, i] * construction_c
 subject to respect_active_infra {e in edges, i in infras, (o, d) in ods}: 
 x[e, o, d, i] <= demand[o, d] * y[e, i];
 
+solve;
+
+/* Resultados */
+
+printf "\Flujo total por arco:\n";
+for {e in edges} {
+  printf "%s, %s\n", e, (sum{(o, d) in ods, i in infras} x[e, o, d, i]);
+}
+
+printf "\Infras por arco:\n";
+for {e in edges} {
+  for {i in infras: y[e, i] = 1} {
+    printf "%s, %s\n", e, i;
+  }
+}
+
+printf "\Presupuesto usado:\n";
+printf (sum{e in edges, i in infras} construction_cost[e, i] * y[e, i]);
+
 end;
