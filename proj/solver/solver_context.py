@@ -29,20 +29,22 @@ class SolverContext(Context):
     the each by demand amount.
     """
     ac = 0
+    paths = {}
 
     result_graph = get_zero_weight_subgraph(
       self.current_graph, configuration.arc_cost_key
     )
 
     for od, demand_amount in self.demand.items():
-      ac += demand_amount * astar_path_length(
+      paths[od], path_length = astar_path(
         result_graph, *od, configuration.arc_weight_key
       )
+      ac += demand_amount * path_length
 
     if ac < self.best_solution.value:
       logging.debug('Best objective {}'.format(ac))
 
-      self.best_solution = Solution(ac, self.modifications)
+      self.best_solution = Solution(ac, self.modifications, shortest_paths=paths)
 
     return ac
 

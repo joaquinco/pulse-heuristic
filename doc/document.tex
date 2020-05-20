@@ -128,8 +128,8 @@
 
   \begin{figure}[]
     \centering
-    \includegraphics[width=6cm]{imgs/mdeo_med.png}
-    \caption{Grafo de Ciudad Vieja, 204 nodos y 770 arcos.}
+    \includegraphics[width=6cm]{imgs/mdeo_med_base.png}
+    \caption{Grafo de Ciudad Vieja, 204 nodos y 770 arcos. Los nodos negros marcan el camino más corto sobre el grafo base entre los cuatro pares origen destino. Notar que estos caminos pueden estar cortados ya que hay arcos solapados debido a errores en la generación del grafo base, lo que causa que el arco pintado de negro quede debajo del gris.}
     \label{ciudadvieja}
   \end{figure}
 
@@ -167,7 +167,9 @@
     \caption{Resumen de infraestructuras consideradas en para Ciudad Vieja.}\label{table:infrasciudadvieja}
   \end{table}
 
-  Utilizando ambos MILP solvers se pudo obtener una solución en poco tiempo. Por otra parte el pulse solver requirió de muchas pruebas hasta llegar a una configuración que sea encontrada de manera aceptablemente rápida y lo mejor posible. Si utilizamos la configuración para buscar el mejor camino, entonces el tiempo de ejecución del pulse solver se dispara indefinidamente. Por otra parte se probó $P0.9$ que también resultó en un tiempo de ejecución excesivo, esta vez debido a que no es posible encontrar una solución que mejore en un $10\%$ el camino mas corto de uno de los pares origen-destino ya que su demanda es muy baja y por lo tanto el presupuesto asignado es insuficiente para lograr esta mejora. En la tabla \ref{table:resultadosciudadvieja} se muestra un breve resumen de los tiempos de ejecución y los valores objetivos. Luego en la figura \ref{resultadosciudadvieja}: referencia figura se muestran las decisiones tomadas por cada solver en el grafo.
+  Utilizando ambos MILP solvers se pudo obtener una solución en poco tiempo. Por otra parte el pulse solver requirió de muchas pruebas hasta llegar a una configuración que sea encontrada de manera aceptablemente rápida y lo mejor posible. Si utilizamos la configuración para buscar el mejor camino, entonces el tiempo de ejecución del pulse solver se dispara indefinidamente. Por otra parte se probó $P0.9$ que también resultó en un tiempo de ejecución excesivo, esta vez debido a que no es posible encontrar una solución que mejore en un $10\%$ el camino mas corto de uno de los pares origen-destino ya que su demanda es muy baja y por lo tanto el presupuesto asignado es insuficiente para lograr esta mejora. Luego de varias pruebas, se obtuvo un resultado medianamente bueno en tiempo de ejecución aceptable utilizando $P0.97$, ignorando nodos más lejanos en el pulso, un delta en el presupuesto por par origen-destino de $500$, dos caminos por par origen-destino y cuatro iteraciones del solver.
+  
+  En la tabla \ref{table:resultadosciudadvieja} se muestra un breve resumen de los tiempos de ejecución y los valores objetivos. Luego en la figura \ref{resultadosciudadvieja}: referencia figura se muestran las decisiones tomadas por cada solver en el grafo. Se observa en la figura de representación de los resultados que la solución exacta asigna todos los recursos a las demandas de mayor valor, que son la que recorre el borde superior y la que recorre los bordes inferior y derecho.
 
   \begin{table}[h!]
     \centering
@@ -177,7 +179,7 @@
       \midrule
       GLPK & 94,5 & 763589,7502 & 14997.77 \\
       CBC & 41,33 & 763589,7502 & - \\
-      Pulse & 182,24 & 942412,8526 & 14995.47 \\
+      Pulse & 106,43 & 942412,8526 & 14995.47 \\
       \bottomrule
     \end{tabular}
     \caption{Resumen de ejecución para el grafo de Ciudad Vieja.}\label{table:resultadosciudadvieja}

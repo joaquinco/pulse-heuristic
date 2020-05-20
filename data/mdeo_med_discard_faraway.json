@@ -13,8 +13,8 @@
   ],
   "config": {
     "arc_weight_key": "weight",
-    "max_iter": 3,
-    "solutions_per_od": 3,
+    "max_iter": 4,
+    "solutions_per_od": 2,
     "od_budget_epsilon": 500,
     "pulse_primal_bound_factor": 0.97,
     "pulse_discard_faraway_nodes": true,
