@@ -1,7 +1,7 @@
 from functools import partial
 import math
 import networkx as nx
-from proj.netowrkx import astar_path
+from proj.netowrkx import astar_path as proj_astar_path
 from proj import configuration
 
 
@@ -26,12 +26,21 @@ def get_heuristic(graph):
   return None
 
 
-def astar_path_length(graph, source, target, weight):
-  _, length = astar_path(
+def astar_path(graph, source, target, weight):
+  return proj_astar_path(
     graph, source, target, heuristic=get_heuristic(graph), weight=weight
   )
 
+
+def astar_path_length(graph, source, target, weight):
+  _, length = astar_path(
+    graph, source, target, weight,
+  )
+
   return length
+
+
+
 
 def get_zero_weight_subgraph(graph, cost_weight):
   """

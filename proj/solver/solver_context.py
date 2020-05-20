@@ -6,7 +6,7 @@ from proj.context import Context
 from proj.cache import cached_property
 from proj.constants import infinite
 from .solution import Solution
-from .functions import astar_path_length, get_zero_weight_subgraph
+from .functions import astar_path, astar_path_length, get_zero_weight_subgraph
 from .graph import construct_multigraph
 
 class SolverContext(Context):
@@ -102,6 +102,7 @@ class SolverContext(Context):
     ret = {}
 
     for od in self.demand.keys():
-      ret[od] = astar_path_length(self.graph, *od, configuration.arc_weight_key)
+      path, ret[od] = astar_path(self.graph, *od, configuration.arc_weight_key)
+      logging.debug(f'Base shortest path for {od}: {path}')
 
     return ret
