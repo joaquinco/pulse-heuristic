@@ -11,6 +11,8 @@ defaults = dict(
   arc_cost_key='construction_cost',
   # Constant factor to multiply cost, which is also multiplied by edge weight
   construction_coefficient=1,
+  # How to calculate od pair budget, based on demand ('demand'), based on path length ('path_length'), or base on both ('both').
+  budget_assignment_approach='demand',
   # Factor of euclidean distance to be used as heuristic function
   astar_heuristic_factor=1,
   # Multiply factor of best cost path on base graph, from which pulse algorithm will yield paths

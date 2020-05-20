@@ -13,6 +13,7 @@
   ],
   "config": {
     "arc_weight_key": "weight",
+    "budget_assignment_approach": "demand",
     "max_iter": 4,
     "solutions_per_od": 2,
     "od_budget_epsilon": 500,

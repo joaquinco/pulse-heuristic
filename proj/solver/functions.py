@@ -49,3 +49,12 @@ def get_zero_weight_subgraph(graph, cost_weight):
 
   return nx.subgraph_view(graph, filter_edge=filter_edge)
 
+
+def normalize(arr):
+  """
+  Normalizes array values to 1
+  """
+
+  total = sum(arr)
+
+  return list(map(lambda x: x / total, arr))

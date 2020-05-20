@@ -6,7 +6,7 @@ from proj.context import Context
 from proj.cache import cached_property
 from proj.constants import infinite
 from .solution import Solution
-from .functions import astar_path, astar_path_length, get_zero_weight_subgraph
+from .functions import astar_path, astar_path_length, get_zero_weight_subgraph, normalize
 from .graph import construct_multigraph
 
 class SolverContext(Context):
@@ -49,8 +49,26 @@ class SolverContext(Context):
     return ac
 
   @cached_property
-  def total_demand(self):
-    return sum(self.demand.values())
+  def budget_percentage_per_od(self):
+    """
+    Calculates budget percentage per od
+    """
+    normalized_base_costs = normalize([self.base_primal_bound[od] for od in self.odpairs])
+    if configuration.budget_assignment_approach == 'path_length':
+      percentages = normalized_base_costs
+
+    normalized_demand = normalize([self.demand[od] for od in self.odpairs])
+    if configuration.budget_assignment_approach == 'demand':
+      percentages = normalized_demand
+    else:
+      percentages = normalize([
+        normalized_base_costs[i] * normalized_demand[i] for i in range(len(self.odpairs))
+      ])
+
+    ret = {od: percentages[i] for i, od in enumerate(self.odpairs)}
+    logging.debug(f'Budget assignment {ret}')
+
+    return ret
 
   @cached_property
   def modifications(self):
@@ -89,7 +107,7 @@ class SolverContext(Context):
     """
     Returns the budget for a given od.
     """
-    p = self.demand[od] / self.total_demand
+    p = self.budget_percentage_per_od[od]
 
     return min(
       configuration.od_budget_factor * p * self.budget + configuration.od_budget_epsilon,
