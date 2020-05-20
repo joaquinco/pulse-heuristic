@@ -40,8 +40,6 @@ def astar_path_length(graph, source, target, weight):
   return length
 
 
-
-
 def get_zero_weight_subgraph(graph, cost_weight):
   """
   Return view of graph with edges whose cost is zero

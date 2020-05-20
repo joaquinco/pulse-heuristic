@@ -62,6 +62,7 @@ def run_solve_search(ctx, od_index):
   if not found:
     logging.warning(f'Path not found for {od}')
 
+
 def run_solve(ctx):
   """
   Run metaheristic
