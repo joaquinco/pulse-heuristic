@@ -17,6 +17,7 @@
     "max_iter": 4,
     "solutions_per_od": 2,
     "od_budget_epsilon": 500,
+    "pulse_queue_key_factor": 2,
     "pulse_primal_bound_factor": 0.97,
     "pulse_discard_faraway_nodes": true,
     "pulse_discard_faraway_delta": 0

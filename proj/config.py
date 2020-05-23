@@ -21,6 +21,8 @@ defaults = dict(
   pulse_discard_faraway_nodes=False,
   # Difference from which to discard faraway nodes
   pulse_discard_faraway_delta=0,
+  # Pulse queue key es computed as cost_bound(node) * pulse_queue_key_factor + pulse_current_cost
+  pulse_queue_key_factor=1,
   # If pulse returns the best pulse, or just the first found. Note that how good is the first found approach can be tunned with pulse_primal_bound_factor.
   pulse_return_best=False,
   # Number of times to run the recursive search

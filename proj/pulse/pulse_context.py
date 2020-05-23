@@ -5,6 +5,7 @@ from proj.context import Context
 from proj.cache import cached_property
 from proj.timer import timed
 from proj.sorted import BinaryTree
+from proj.config import configuration
 from .pulse import Pulse
 
 class PulseContext(Context):
@@ -46,8 +47,17 @@ class PulseContext(Context):
     
     # Pulses over which we'll iterate
     self.pulses = BinaryTree(
-      [Pulse(self.source, empty_weights)], key=self.projected_weight
+      [Pulse(self.source, empty_weights)], key=self.pulse_queue_key
     )
+
+  def pulse_queue_key(self, pulse):
+    """
+    Returns pulse sort key in the pulse queue.
+
+    It's similar to projected weight but multiplies the cost bound by a configured factor.
+    """
+    return self.get_cost_bound(pulse.node) * configuration.pulse_queue_key_factor \
+            + pulse.weights[self.cost_weight]
 
   def projected_weight(self, pulse):
     """
