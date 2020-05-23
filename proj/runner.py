@@ -16,7 +16,7 @@ logging.basicConfig(
 def run_comparison_med():
   configuration.arc_weight_key = 'weight'
   configuration.max_iter = 1
-  configuration.pulse_primal_bound_factor = 1
+  configuration.solve_primal_bound_factor = 1
 
   file_path_prefix = path.join(path.dirname(__file__), '..', 'data/mdeo_med')
   graph = nx.read_yaml(f'{file_path_prefix}.yml')
@@ -54,7 +54,7 @@ def run_comparison_med():
 def run_comparison_large():
   configuration.arc_weight_key = 'weight'
   configuration.max_iter = 1
-  configuration.pulse_primal_bound_factor = 1
+  configuration.solve_primal_bound_factor = 1
 
   file_path_prefix = path.join(path.dirname(__file__), '..', 'data/mdeo_large')
   graph = nx.read_yaml(f'{file_path_prefix}.yml')

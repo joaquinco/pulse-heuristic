@@ -38,6 +38,7 @@ def main():
   Running params:
   input: {args.config_file}
   demand: \n{pp.pformat(data.demand, indent=4)}
+  od_primal_bounds: \n{pp.pformat(data.od_primal_bounds, indent=4)}
   infras: \n{pp.pformat(data.infrastructures, indent=5)}
   budget: {data.budget}
   nodes: {data.graph.number_of_nodes()}
@@ -45,7 +46,7 @@ def main():
   config: \n{pp.pformat(configuration, indent=4)}
       """
     )
-    solution = solve(*arguments)
+    solution = solve(*arguments, od_primal_bounds=data.od_primal_bounds)
     solution.print()
 
 

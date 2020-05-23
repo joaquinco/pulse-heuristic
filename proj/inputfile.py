@@ -1,18 +1,19 @@
 import json
+from collections import OrderedDict
 
 import networkx as nx
 from proj.context import Context
 
 
-def as_tuples_dict(data):
+def as_tuples_dict(data, value_key='value'):
   """
   Parses a list of { source:, target:, value:} and return a dict
   of {(source,target): value, ...}
   """
-  ret = {}
+  ret = OrderedDict()
   for entry in data:
     key = (entry['source'], entry['target'])
-    value = entry['value']
+    value = entry.get(value_key)
     ret[key] = value
 
   return ret
@@ -38,7 +39,7 @@ def parse_config_file(file_path):
     },
     budget: ..,
     demand: [
-      { source: ..., target: ..., value: ... },
+      { source: ..., target: ..., value: ... , improve_factor: <optional> },
       ...
     ],
     config: {
@@ -60,12 +61,14 @@ def parse_config_file(file_path):
   budget = data['budget']
 
   demand = as_tuples_dict(data['demand'])
+  od_primal_bounds = as_tuples_dict(data['demand'], value_key='improve_factor')
 
   config = data.get('config', {})
 
   return Context(
     graph=graph,
     demand=demand,
+    od_primal_bounds=od_primal_bounds,
     infrastructures=infrastructures,
     budget=budget,
     config=config

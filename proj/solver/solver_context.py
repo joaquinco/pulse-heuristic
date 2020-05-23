@@ -10,7 +10,7 @@ from .functions import astar_path, astar_path_length, get_zero_weight_subgraph, 
 from .graph import construct_multigraph
 
 class SolverContext(Context):
-  def __init__(self, graph, infrastructures, demand, budget, **kwargs):
+  def __init__(self, graph, infrastructures, demand, budget, od_primal_bounds=None, **kwargs):
     self.graph = graph
     self.demand = demand
     self.infrastructures = infrastructures
@@ -18,6 +18,7 @@ class SolverContext(Context):
     self.available_budget = budget
     self.best_solution = Solution(infinite, {})
     self.current_graph = construct_multigraph(graph, infrastructures)
+    self._od_primal_bounds = od_primal_bounds or {}
 
     super().__init__(**kwargs)
 
@@ -126,3 +127,13 @@ class SolverContext(Context):
       logging.debug(f'Base shortest path for {od}: {path}')
 
     return ret
+
+  @cached_property
+  def od_primal_bound_factor(self):
+    ret = {}
+
+    for od in self.demand.keys():
+      ret[od] = self._od_primal_bounds.get(od) or configuration.solve_primal_bound_factor
+
+    return ret
+

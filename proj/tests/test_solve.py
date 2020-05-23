@@ -24,7 +24,7 @@ class SolveTestCase(unittest.TestCase):
 
     configuration.arc_weight_key = 'cost'
     configuration.max_iter = 1
-    configuration.pulse_primal_bound_factor = 0.95
+    configuration.solve_primal_bound_factor = 0.95
 
   def test_create_multigraph(self):
     graph = construct_multigraph(self.graph, self.infras)

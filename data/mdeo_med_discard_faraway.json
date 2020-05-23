@@ -6,19 +6,19 @@
   },
   "budget": 15000,
   "demand": [
-    { "source": "15155", "target": "7884", "value": 500 },
-    { "source": "7310", "target": "15195", "value": 50 },
-    { "source": "15239", "target": "7626", "value": 100 },
-    { "source": "8867", "target": "12671", "value": 350 }
+    { "source": "15155", "target": "7884", "value": 500, "improve_factor": 0.6 },
+    { "source": "7310", "target": "15195", "value": 50, "improve_factor": 1 },
+    { "source": "15239", "target": "7626", "value": 100, "improve_factor": 0.9 },
+    { "source": "8867", "target": "12671", "value": 350, "improve_factor": 0.7 }
   ],
   "config": {
     "arc_weight_key": "weight",
     "budget_assignment_approach": "demand",
-    "max_iter": 4,
-    "solutions_per_od": 2,
-    "od_budget_epsilon": 500,
+    "max_iter": 20,
+    "solutions_per_od": 1,
+    "od_budget_epsilon": 0,
     "pulse_queue_key_factor": 2,
-    "pulse_primal_bound_factor": 0.97,
+    "solve_primal_bound_factor": 0.97,
     "pulse_discard_faraway_nodes": true,
     "pulse_discard_faraway_delta": 0
   }

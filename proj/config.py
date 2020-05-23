@@ -15,15 +15,15 @@ defaults = dict(
   budget_assignment_approach='demand',
   # Factor of euclidean distance to be used as heuristic function
   astar_heuristic_factor=1,
-  # Multiply factor of best cost path on base graph, from which pulse algorithm will yield paths
-  pulse_primal_bound_factor=1,
+  # Multiply factor of best cost path on base graph, from which pulse algorithm will yield paths.
+  solve_primal_bound_factor=1,
   # On each Pulse iteration, ignore adjacents whose cost_bound is higher that current node.
   pulse_discard_faraway_nodes=False,
   # Difference from which to discard faraway nodes
   pulse_discard_faraway_delta=0,
   # Pulse queue key es computed as cost_bound(node) * pulse_queue_key_factor + pulse_current_cost
   pulse_queue_key_factor=1,
-  # If pulse returns the best pulse, or just the first found. Note that how good is the first found approach can be tunned with pulse_primal_bound_factor.
+  # If pulse returns the best pulse, or just the first found. Note that how good is the first found approach can be tunned with solve_primal_bound_factor.
   pulse_return_best=False,
   # Number of times to run the recursive search
   max_iter=10,

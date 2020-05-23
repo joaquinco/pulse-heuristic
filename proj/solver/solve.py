@@ -30,7 +30,7 @@ def run_solve_search(ctx, od_index):
   source, target = od
 
   constraints = { configuration.arc_cost_key: ctx.get_budget(od) }
-  primal_bound = ctx.base_primal_bound[od] * configuration.pulse_primal_bound_factor
+  primal_bound = ctx.base_primal_bound[od] * ctx.od_primal_bound_factor[od]
 
   logging.debug(
     'Running od {}, constraints: {}, primal_bound: {}'.format(
@@ -81,7 +81,7 @@ def run_solve(ctx):
 
 
 @timed('Solve')
-def solve(graph, infrastructures, demand, budget):
+def solve(graph, infrastructures, demand, budget, od_primal_bounds=None):
   """
   Runs the algorithm to solve the multi-commodity multi-facility problem
 
@@ -94,7 +94,7 @@ def solve(graph, infrastructures, demand, budget):
   random.seed(configuration.seed)
 
   g = SolverContext(
-    graph, infrastructures, demand, budget,
+    graph, infrastructures, demand, budget, od_primal_bounds=od_primal_bounds,
   )
 
   try:
