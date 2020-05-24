@@ -15,10 +15,10 @@
   "config": {
     "arc_weight_key": "weight",
     "budget_assignment_approach": "demand",
-    "max_iter": 1,
+    "max_iter": 20,
     "solutions_per_od": 1,
-    "od_budget_epsilon": 1000,
-    "pulse_queue_key_factor": 2,
+    "od_budget_epsilon": 300,
+    "pulse_queue_key_factor": 2.5,
     "pulse_primal_bound_factor": 0.99,
     "pulse_discard_faraway_nodes": true,
     "pulse_discard_faraway_delta": 0
