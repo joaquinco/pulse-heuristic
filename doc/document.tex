@@ -25,11 +25,11 @@
 
   \section*{Introducción}
 
-  Como proyecto de aplicación del algorítmo del Pulso propongo su aplicación al problema de ruteo de demanda y decisión de construcción de ciclovías en una ciudad, puede ser visto como una versión del problema de distribución de mercancías, sobre una red que puede ser mejorada mediante la construcción de instalaciones que mejoren la distribución. Utilizo el pulso como método alternativo a la programación matemática con el objetivo de escalar mejor en el tamaño de las instancias atacables, aunque con esto se pueda perder la exactitud de la solución, es decir lo utilizo como heurístca. Finalmente realizo un comparación en medida de lo posible con el MILP que resuelve el problema exacto e incluyo una sección con características propias y trabajo futuro.
+  Como proyecto de aplicación del algorítmo del Pulso se propone su aplicación al problema de ruteo de demanda y decisión de construcción de ciclovías en una ciudad, puede ser visto como una versión del problema de distribución de mercancías, sobre una red que puede ser modificada mediante la construcción de instalaciones que mejoren la distribución. Se utiliza el pulso como método alternativo a la programación matemática con el objetivo de escalar mejor en el tamaño de las instancias atacables, aunque con esto se pueda perder la óptimalidad, es decir lo utilizo como metaheurístca. Finalmente se realiza un comparación en medida de lo posible con el MILP que resuelve el problema exacto e incluyo una sección con características propias y trabajo futuro.
 
   \section*{Problema}
 
-  El problema consiste en decidir dónde construir ciclovías de manera que satisfaga las necesidades de los usuarios, representados por la demanda, de la mejor manera. Matemáticamente, el modelo consiste en un grafo dirigido y un conjunto de pares origen-destino donde para cada uno se tiene un valor de demanda (por ejemplo cantidad de personas). Para cada arco del grafo, se tiene un costo de usuario que corresponde al costo percibido por un usuario si lo utiliza para desplazarse y un costo de construcción de diversos tipos de ciclovías. Al construir una ciclovía sobre un arco, el costo de usuario disminuye. Finalmente se tiene un valor de presupuesto que limita la construcción de ciclovías.
+  El problema consiste en decidir dónde construir ciclovías de manera que satisfaga las necesidades de los usuarios, representados por la demanda, de la mejor manera. Matemáticamente, el modelo consiste en un grafo dirigido y un conjunto de pares origen-destino donde para cada uno se tiene un valor de demanda (por ejemplo cantidad de personas). Para cada arco del grafo, se tiene un costo de usuario que corresponde al costo percibido por un usuario si lo utiliza para desplazarse y un costo de construcción de diversos tipos de ciclovías. Al construir una ciclovía sobre un arco, el costo de usuario disminuye frente a la no construcción. Finalmente se tiene un valor de presupuesto que limita la construcción de ciclovías.
 
   La formulación matemática es la siguiente:
 
@@ -69,7 +69,7 @@
 
   Se puede observar de la formulación, que si bien el grafo base es un grafo simple, se está trabajando sobre un multigrafo. Cada arco del grafo base es replicado tantas veces como cantidad de infraestructuras hay y cada replica tiene un costo de usuario y costo de construcción asociado.
 
-  Lo que se busca son caminos óptimos por este multigrafo, con restricción de presupuesto, que determina para cada par de nodos, qué arco se elije, si se elije alguno. Notar que si se activa la infraestructura $i$ en el arco $e$, esta puede ser usada por cualquiera de los flujos entre pares origen-destino.
+  Lo que se busca son caminos óptimos por este multigrafo, con restricción de presupuesto. Notar que si se activa la infraestructura $i$ en el arco $e$, esta puede ser usada por cualquiera de los flujos entre pares origen-destino.
 
   Una cosa que no esta representada en el modelo, pero que se desprende de la realidad, es que siempre habrá una solución factible. Esto es debido a que se toma el grafo base como una de las infraestructuras cuyo costo de construcción es cero.
 
@@ -83,7 +83,7 @@
 
   Supongamos para simplificar, que tenemos un único par origen-destino. Debemos encontrar la asignación de infraestructuras a arcos que hagan mejor uso del presupuesto $B$. Si modelamos el grafo con infraestructuras como un multigrafo, esto se puede resolver como un problema de camino más corto con restricciónes o weighted-constrained shortest-path. Aquí es donde entra el algorítmo del Pulso.
 
-  Es de suponer, que en la simplificación de un único par origen-destino, el pulso, o cualquier algorítmo exacto para el WCSP debe encontrar la mejor solución, la misma que encontraría el MILP solver. Ahora, si consideramos mas de un par origen-destino la cosa cambia.
+  Es de suponer, que en la simplificación de un único par origen-destino, el pulso, o cualquier algorítmo exacto para el WCSP debe encontrar la mejor solución, la misma que encontraría el MILP solver. Sin embargo, si consideramos mas de un par origen-destino el problema se complejiza.
 
   Si bien los pares origen-destino son independientes, la red subyacente es común, y el hecho de que una infraestructura esté activa o no en cierto arco puede determinar el camino mas corto entre varios pares origen-destino. Supongamos que se toma un par origen-destino y se ejecuta el pulso con cierta restricción de presupuesto. Luego se toma el siguiente par origen-destino y se ejecuta el pulso, con cierta restricción de presupuesto, si es que aún queda, y sobre el multigrafo luego de aplicar las infraestructuras que el pulso eligió para el primer par origen-destino. Se puede continuar este proceso iterativo hasta quedarse sin pares origen-destino. El hecho de quedarse sin presupuesto no afecta en lo mas mínimo, debido a que siempre habrán caminos cuyos costo de construcción sean cero. A grandes rasgos, este fue el camino que se siguió.
 
@@ -104,32 +104,32 @@
 
   \subsection*{Pulse Solver}
 
-  El algoritmo que soluciona el problema, llamemoslo {\it Pulse solver}, se implementó como un algoritmo recursivo que en cada paso recursivo selecciona un par origen destino, corre el pulso y para cada camino generado, lo aplica al grafo, llama al paso recursivo y luego vuelve el grafo a su estado inicial. El solver puede tener una cantidad exponencial (en la cantidad de pares origen-destino) de pasos recursivos, si el pulso genera muchos caminos en cada paso. Por eso necesario que cada camino generado por el pulso sea lo mejor posible. Más allá de los caminos que pueda generar el pulso en cada paso, se puede limitar la cantidad considerada con un parámetro del programa.
+  El algoritmo que soluciona el problema, llamemoslo {\it Pulse solver}, se implementó como un algoritmo recursivo que en cada paso recursivo selecciona un par origen destino, corre el pulso y para cada camino generado, lo aplica al grafo, llama al paso recursivo y luego vuelve el grafo a su estado anterior. El solver puede tener una cantidad exponencial (en la cantidad de pares origen-destino) de pasos recursivos, si el pulso genera muchos caminos en cada paso. Por eso necesario que cada camino generado por el pulso sea lo mejor posible. Más allá de los caminos que pueda generar el pulso en cada paso, se puede limitar la cantidad considerada con un parámetro del programa.
 
   Cada ejecución del árbol de recursiones es considerada una iteración. Se puede configurar la cantidad de iteraciones a realizar el algorítmo. En cada iteración, la secuencia en que son elegidos los pares origen destino es aleatorizada.
 
-  Para flexibilizar un poco el presupuesto asignado a cada pulso, se pueden especificar dos numeros $P_{\alpha}$ y $P_{\beta}$ de manera que el presupuesto asignado al par origen destino $o$, sea $BP_oP_{\alpha} + P_{\beta}$, donde $P_o$ es la proporción del total del presupuesto total $B$ asignado a $o$. Esto puede causar que el o los ultimos pares origen-destino considerados en la recursión tengan presupuesto $0$, pues este se asigno completamente a pares origen-destino anteriores en la recursión.
+  Para flexibilizar un poco el presupuesto asignado a cada pulso, se pueden especificar dos numeros $P_{\alpha}$ y $P_{\beta}$ de manera que el presupuesto asignado al par origen destino $o$, sea $BP_oP_{\alpha} + P_{\beta}$, donde $P_o$ es la proporción del total del presupuesto total $B$ asignado a $o$. Esto puede causar que los ultimos pares origen-destino considerados en la recursión tengan presupuesto $0$, pues este se asigno completamente a pares origen-destino anteriores en la recursión.
 
   \subsection*{Pulso}
 
-  El algoritmo del pulso requiere cuatro parámetros en su forma mas básica: el grafo, las restricciones y los nodos origen y destino. Se implementó de manera que sea mas bien un generador de caminos entre los nodos origen y destino. Para limitar la cantidad de caminos generados se puede puede incluir un parámetro que indica el costo máximo que deben tener los caminos generados y también existe la posibilidad de que devuelva unicamente el mejor. Estos últimos parámetros son de utilidad ya que la complejidad de buscar la mejor solución es mucho mayor que buscar una solución suficientemente buena, como se describirá en la sección de resultados.
+  El algoritmo del pulso requiere cuatro parámetros en su forma mas básica: el grafo, las restricciones y los nodos origen y destino. Se implementó de manera que sea mas bien un generador de caminos entre los nodos origen y destino. Para limitar la cantidad de caminos generados se puede incluir un parámetro que indica el costo máximo que deben tener los caminos generados y también existe la posibilidad de que devuelva unicamente el mejor. Estos últimos parámetros son de utilidad ya que la complejidad de buscar la mejor solución es mucho mayor que buscar una solución suficientemente buena, como se describirá en la sección de resultados.
 
   \subsection*{Otras opciones}
 
   \begin{description}
     \item[Descartar nodos mas lejanos:] Booleano, por defecto falso. Durante la ejecución del pulso, no considera nodos cuya cota mínima de costo sea mayor a la del pulso corriente. Esto puede ser deseado o no dependiendo del conjunto de datos.
-    \item[Delta de descarte de nodos mas lejanos:] Numero, valor de la diferencia a prtir del cual se descartan nodos mas lejanos. También puede ser usado para forzar la elecciones de nodos mas cercanos, si se utiliza un valor negativo.
+    \item[Delta de descarte de nodos mas lejanos:] Numero, valor de la diferencia a partir del cual se descartan nodos mas lejanos. También puede ser usado para forzar la elecciones de nodos mas cercanos, si se utiliza un valor negativo.
   \end{description}
 
   \section*{Casos de estudio}
 
-  En esta sección se comparan los tiempos y las variables obtenidas de la ejecución de los solvers GLPK\footnote{Gnu Linear Programing Kit} y CBC\footnote{Coin-or branch and cut} y el Pulse solver. Sobre el último, se detallará para cada caso la configuración utilizada.
+  En esta sección se comparan los tiempos y las variables obtenidas de la ejecución del solver GLPK\footnote{Gnu Linear Programing Kit} y el Pulse solver. Sobre el último, se detallará para cada caso la configuración utilizada.
 
   Los MILP solvers son ejecutados con la opcion de utilizar métodos de Cutting-Plane, lo que mejora considerablemente su tiempo de ejecución frente al Branch and Cut.
 
   \subsection*{Ciudad Vieja}
 
-  El primer nivel de comparación y ejecución del modelo se realizó con un grafo que representa aproximadamente\footnote{Se generó a partir de información de cruces de calles} el barrio Ciudad Vieja de Montevideo. En este grafo todas las calles van en ambas direcciones. Cuenta con 204 nodos y 770 arcos y su inexacta representación esta en la figura.
+  El primer caso de comparación y ejecución del modelo se realizó con un grafo que representa aproximadamente\footnote{Se generó a partir de información de cruces de calles} el barrio Ciudad Vieja de Montevideo. En este grafo todas las calles van en ambas direcciones. Cuenta con 204 nodos y 770 arcos y su inexacta representación esta en la figura.
 
   \begin{figure}[h!]
     \centering
@@ -138,7 +138,7 @@
     \label{ciudadvieja}
   \end{figure}
 
-  Para este caso de prueba, se eligieron cuatro pares origen destino y un presupuesto de 15.000. En la tabla \ref{table:odsciudadvieja} se pueden observar los pares origen-destino elegido y el costo del camino mas corto sobre el grafo base. El valor objetivo en el grafo base es de 1.496.098,44.
+  Para este caso de prueba, se eligieron cuatro pares origen destino y un presupuesto de 15.000. En la tabla \ref{table:odsciudadvieja} se pueden observar los pares origen-destino elegido y el costo del camino mas corto sobre el grafo base. El valor objetivo en el grafo base, es decir suma del costo percibido por la demanda por el camino más corto de cada una en el grafo base, es de 1.496.098,44.
 
   \begin{table}[h!]
     \centering
@@ -155,7 +155,7 @@
     \caption{Resumen de pares origen-destino considerados para Ciudad Vieja. Estos datos de fueron elegidos de forma manual.}\label{table:odsciudadvieja}
   \end{table}
   
-  Ademas, se especificaron tres infraestructuras a construir, que junto a la infraestructura base quedan en cuatro. Los factores de mejora sobre el costo de usuario se especifican en la tabla \ref{table:infrasciudadvieja}.
+  Ademas, se especificaron tres infraestructuras construibles, que junto a la infraestructura base quedan en cuatro. Los factores de mejora y de construcción se especifican sobre el costo de usuario, en la tabla \ref{table:infrasciudadvieja}. El costo de usuario base $c$ es la distancia entre dos nodos.
 
   \begin{table}[h!]
     \centering
@@ -163,18 +163,18 @@
       \toprule
       Infrastructura & Costo de usario & Costo de construcción \\
       \midrule
-      base & c & c \\
-      0 & 0.9c & c \\
-      1 & 0.5c & 4c \\
-      2 & 0.4c & 8c \\
+      0 (base) & c & 0 \\
+      1 & 0.9c & c \\
+      2 & 0.5c & 4c \\
+      3 & 0.4c & 8c \\
       \bottomrule
     \end{tabular}
     \caption{Resumen de infraestructuras consideradas para Ciudad Vieja.}\label{table:infrasciudadvieja}
   \end{table}
 
-  Utilizando ambos MILP solvers se pudo obtener una solución en poco tiempo. Por otra parte el Pulse solver requirió de muchas pruebas hasta llegar a una configuración que ejecute de manera aceptablemente rápida y encuentre una solución medianamente buena. Si utilizamos la configuración para buscar el mejor camino, entonces el tiempo de ejecución del pulse solver se dispara indefinidamente. Por otra parte se probó un factor de mejora de $0.9$ que también resultó en un tiempo de ejecución excesivo, esta vez debido a que no es posible encontrar una solución que mejore en un $10\%$ el camino mas corto de uno de los pares origen-destino ya que su demanda es muy baja y por lo tanto el presupuesto asignado es insuficiente para lograr esta mejora. Luego de varias pruebas, se obtuvo un resultado medianamente bueno en tiempo de ejecución aceptable utilizando $P0.97$, ignorando nodos más lejanos en el pulso, un delta en el presupuesto por par origen-destino de $500$, dos caminos por par origen-destino y cuatro iteraciones del solver.
+  Utilizando ambos MILP solvers se pudo obtener una solución en poco tiempo. Por otra parte el Pulse solver requirió de muchas pruebas hasta llegar a una configuración que ejecute de manera aceptablemente rápida y encuentre una solución medianamente buena. Si utilizamos la configuración para buscar el mejor camino, entonces el tiempo de ejecución del pulse solver se dispara indefinidamente. Por otra parte se probó un factor de mejora de 0,9 que también resultó en un tiempo de ejecución excesivo, esta vez debido a que no es posible encontrar una solución que mejore en un $10\%$ el camino mas corto de uno de los pares origen-destino ya que su demanda es muy baja y por lo tanto el presupuesto asignado es insuficiente para lograr esta mejora. Luego de varias pruebas, se obtuvo un resultado medianamente bueno en tiempo de ejecución aceptable utilizando un factor de mejora de 0,97 ignorando nodos más lejanos en el pulso, un $P_{\beta}$ en el presupuesto por par origen-destino de $500$, dos caminos por par origen-destino y cuatro iteraciones del solver.
   
-  En la tabla \ref{table:resultadosciudadvieja} se muestra un breve resumen de los tiempos de ejecución y los valores objetivos. Luego en la figura \ref{resultadosciudadvieja} se muestran las decisiones sobre las infraestructuras tomadas por cada solver en el grafo. Se observa en la figura de representación de los resultados que la solución exacta asigna todos los recursos a las demandas de mayor valor, que son la que recorre el borde superior y la que recorre los bordes inferior y derecho.
+  En la tabla \ref{table:resultadosciudadvieja} se muestra un breve resumen de los tiempos de ejecución y los valores objetivos. Luego en la figura \ref{resultadosciudadvieja} se muestran las decisiones sobre las infraestructuras tomadas por cada solver en el grafo. Se observa en la figura de representación de los resultados que la solución exacta asigna todos los recursos a las dos demandas de mayor valor, que son la que recorre el borde superior y la que recorre los bordes inferior y derecho.
 
   \begin{table}[h!]
     \centering
@@ -183,7 +183,6 @@
       Solver & Tiempo ejecución (s) & Presupuesto usado & Valor objetivo & Mejora \\
       \midrule
       GLPK  & 94,5   & 14997.77 & 763589,75 & \%49 \\
-      CBC   & 41,33  & -        & 763589,75 & \%49 \\
       Pulse & 106,43 & 14995.47 & 942412,85 & \%38 \\
       \bottomrule
     \end{tabular}
@@ -227,16 +226,19 @@
     \label{montevideo}
   \end{figure}
 
-  La configuración para este caso fue más conservadora y se permitió solo un camino generado por par origen-destino, el hecho de que sea un grafo mucho mayor implica que el impacto de una búsqueda en espacio exponencial sea descartada. Luego se configuró un factor de mejora sobre el camino más corto base de $0.99$ y un epsilon de presupuesto de 300. En el pulso, como en el caso anterior, se descartan nodos más lejanos.
+  La configuración para este caso fue más conservadora y se permitió solo un camino generado por par origen-destino, el hecho de que sea un grafo mucho mayor implica que el impacto de una búsqueda en espacio exponencial sea descartada. Luego se configuró un factor de mejora sobre el camino más corto base de $0.99$ y un $P_{\beta}$ de presupuesto de 300. En el pulso, como en el caso de Ciudad Vieja, se descartan nodos más lejanos.
 
-  Durante la ejecución de este caso, se observó que el pulso tuvo dificultades para encontrar caminos a los nodos destino. Esta dificultad se vió incrementada para los pares origen-destino de costo de camino más corto mayor.
-  La falencia radica en la forma de ordenar la cola de pulsos. Hasta el momento, la cola de pulsos es ordenada por costo proyectado (cost bound en el nodo sumado al costo del pulso). El problema es que el cost bound, resultado de ejecutar el Dijkstra inicial, es demasiado bajo comparado con el costo que termina teniendo el camino, es decir, que no es una buena cota inferior. Esto se debe a que la mejor infraestructura tiene una disminución del costo del $90\%$, (lo que significa que el cost bound de un nodo será de $90\%$ menor que el costo sin infraestructura). Esto causa que el pulso se comporte más como un BFS que DFS. Se debió agregar una configuración: un factor que multiplique el cost bound.
+  Durante la ejecución de este caso, se observó que el pulso tuvo dificultades para encontrar caminos a los nodos destino. Esta dificultad se vió incrementada para los pares origen-destino más lejanos en cantidad de arcos.
+
+  Se observó que la falencia radica en la forma de ordenar la cola de pulsos. Hasta el momento, la cola de pulsos es ordenada por costo proyectado (cost bound en el nodo sumado al costo del pulso). El problema es que el cost bound, resultado de ejecutar el Dijkstra inicial, es demasiado bajo comparado con el costo que termina teniendo el camino, es decir, que no es una buena cota inferior. Esto se debe a que la mejor infraestructura tiene una disminución del costo del $90\%$, (lo que significa que el cost bound de un nodo será de $90\%$ menor que el costo sin infraestructura). Esto causa que el pulso se comporte más como un BFS que DFS. Para contrarrestar esto,se agregó una configuración: un factor que multiplique el cost bound al calcular el costo proyectado.
 
   Luego de varias pruebas, se determinó que un valor del factor de multiplicación del cost bound de $2.5$ permite obtener resultados en tiempo aceptable para la configuración anteriormente mencionada. Valores menores al mencionado hacían que el tiempo de ejecución se dispare. Debido al corto tiempo de ejecución se pudo aumentar la cantidad de iteraciones a $20$ lo que permitió encontrar una solución un poco mejor.
   
-  En la figura \ref{resultadosmontevideo} se pueden observar las decisiones tomadas por el Pulse solver. Se observa claramente que las infraestructuras fueron colocadas en uno de los extremos de cada camino, lo cual indica una toma de decisiones que puede ser mejorada. El valor objetivo de esta solución es de $22865161,48$, un $20\%$ sobre el valor objetivo en el grafo base y se obtuvo en 14 segundos.
+  Durante las pruebas, diferentes valores de $P_{\beta}$ determinaban para algunos pares origen-destino que la ejecución del pulso diverja o no. Incluso luego de agregar el factor que multiplica el cost bound. Esto se observó en casos en que la asignación de presupuesto era muy baja, lo que causaba que el factor de multiplicación del cost bound sea demasiado bajo para ese caso en particular.
+  
+  En la figura \ref{resultadosmontevideo} se pueden observar las decisiones tomadas por el Pulse solver. Se observa claramente que las infraestructuras fueron colocadas en uno de los extremos de cada camino, lo cual indica una toma de decisiones que puede ser mejorada. El valor objetivo de esta solución es de 22.865.161,48, un $20\%$ menor que el valor objetivo en el grafo base y se obtuvo en 14 segundos.
 
-  La ejecución en GLPK de este caso, no ha finalizado al momento de la escritura de este informe luego de 26 horas de ejecución. Se estimará la distancia al valor objetivo de la solución del Pulse solver utilizando los resultados de Ciudad Vieja, suponiendo que el valor objetivo depende, dadas las infraestructuras, del presupuesto y de el valor objetivo base. 
+  La ejecución en GLPK de este caso, no ha finalizado al momento de la escritura de este informe luego de 40 horas de ejecución.
 
   \begin{figure}[h!]
     \centering
@@ -245,7 +247,11 @@
     \label{resultadosmontevideo}
   \end{figure}
 
-  \section*{Implementación}
+  \section*{Conclusión}
+
+  Se mostró que el algorítmo del Pulso puede ser aplicado como metaheurístca del problema descrito. Si bien los resultados no fueron los mejores, hay mucho que se puede mejorar ya que esto solo fue una prueba de concepto.
+
+  Hay varios caminos a seguir a partir de aquí. Se puede continuar con la mejora del algorítmo planteado en este trabajo o utilizarlo como pieza de otro sistema. Por ejemplo se podrían mejorar las soluciones de obtenidas por algún mecanismo de búsqueda local.
 
   \section*{Trabajo futuro}
 
@@ -259,6 +265,12 @@
 
   La poda por costo puede ser mejorada de manera que se poden pulsos mas tempranamente. La poda actual solo considera la cota mínima del costo para obtener un costo mínimo proyectado hasta el destino. Sin embargo, este costo mínimo puede que sea inalcanzable debido a que los recursos que requiere no son factibles al sumarlos al pulso que se compara.
 
+  \subsection*{Mejora en la cola de pulsos}
+
+  En cada iteración del algorítmo del Pulso, el pulso elegido es determinante para una buena y rápida convergencia. En el caso de Montevideo se tuvieron varios problemas en este aspecto lo por lo que un mejor diseño de este aspecto del algorítmo es clave.
+  
+  Por ejemplo se podrían considerar el costo de construcción junto al costo del pulso a insertar en la cola, para calcular el orden de ésta. También se podría estimar el factor de multiplicación del cost bound dependiendo del valor de la restricción de presupuesto, de las infraestructuras disponibles y del costo del camino más corto.
+
   \subsection*{Implementación más rápida}
 
   Para este estudio se utilizó python como lenguaje de implementación, que permite un rápido desarrollo y puesta en funcionamiento pero no es tan bueno en términos de eficiencia en el cómputo. Una implementación en un lenguaje de mas bajo nivel puede lograr mejoras considerables en el tiempo de ejecución.
@@ -270,5 +282,15 @@
   \subsection*{Versión paralela}
 
   Se puede analizar la posibilidad de paralelizar el Pulse solver. Por ejemplo correr un pulso sobre una copia del multigrafo inicial, para cada par origen-destino e ir generando un pool de caminos que luego el algorítmo recursivo va aplicando y adaptando según el estado del multigrafo dentro de la recursión.
+
+  \section*{Implementación}
+
+  La implementación de lo descrito en este trabajo se realizó en python y se encuentra accesible públicamente en las referencias \ref{repo}.
+
+  \section*{Referencias}
+
+  \begin{enumerate}
+    \item \label{repo} https://github.com/joaquinco/pulse-heuristic
+  \end{enumerate}
 
 \end{document}
