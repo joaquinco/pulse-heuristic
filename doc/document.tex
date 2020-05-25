@@ -94,7 +94,7 @@
   Se implementó una versión del pulso simple que incluye las siguientes características:
 
   \begin{description}
-    \item[Poda por costo]: {se corre inicialmente un Dijkstra sobre el reverso del grafo base\footnote{El grafo con los arcos en sentido opuesto}, para obtener una cota inferior del costo desde cada nodo al nodo objetivo. Luego se utiliza esta información para realizar la poda por costo.}
+    \item[Poda por costo]: {se corre inicialmente un Dijkstra sobre el reverso del grafo base\footnote{El grafo con los arcos en sentido opuesto}, para obtener una cota inferior del costo desde cada nodo al nodo objetivo, en adelante se le referirá como {\it cost bound}. Luego se utiliza esta información para realizar la poda por costo.}
     \item[Poda por infactibilidad]: {se corre, para cada restricción, un Dijkstra sobre el grafo reverso tomando dicha restricción como el costo de los arcos. De esta forma obtenemos un valor mínimo de cada restricción requerido para llegar al nodo destino.}
     \item[Poda por dominancia]: {cuando un pulso llega a un nodo, se verifica que dicho pulso no esté dominado por algún otro pulso que ya se encuentre en el nodo.}
     \item[Cola de pulsos]: {En cada iteración, el pulso elegido es el que tiene menor costo proyectado. Es decir, cuyo costo actual mas la cota inferior del costo en el nodo, es menor.}
@@ -104,11 +104,11 @@
 
   \subsection*{Pulse Solver}
 
-  El algoritmo que soluciona el problema, llamemoslo {\it Pulse solver}, se implementó como un algoritmo recursivo que en cada paso recursivo selecciona un par origen destino, corre el pulso y para cada camino generado, lo aplica al grafo, llama al paso recursivo y luego vuelve el grafo a su estado anterior. El solver puede tener una cantidad exponencial (en la cantidad de pares origen-destino) de pasos recursivos, si el pulso genera muchos caminos en cada paso. Por eso necesario que cada camino generado por el pulso sea lo mejor posible. Más allá de los caminos que pueda generar el pulso en cada paso, se puede limitar la cantidad considerada con un parámetro del programa.
+  El algoritmo que soluciona el problema, llamémoslo {\it Pulse solver}, se implementó como un algoritmo recursivo que en cada paso recursivo selecciona un par origen destino, corre el pulso y para cada camino generado, lo aplica al grafo, llama al paso recursivo y luego vuelve el grafo a su estado anterior. El solver puede tener una cantidad exponencial (en la cantidad de pares origen-destino) de pasos recursivos, si el pulso genera muchos caminos en cada paso. Por eso necesario que cada camino generado por el pulso sea lo mejor posible. Más allá de los caminos que pueda generar el pulso en cada paso, se puede limitar la cantidad considerada con un parámetro del programa.
 
   Cada ejecución del árbol de recursiones es considerada una iteración. Se puede configurar la cantidad de iteraciones a realizar el algorítmo. En cada iteración, la secuencia en que son elegidos los pares origen destino es aleatorizada.
 
-  Para flexibilizar un poco el presupuesto asignado a cada pulso, se pueden especificar dos numeros $P_{\alpha}$ y $P_{\beta}$ de manera que el presupuesto asignado al par origen destino $o$, sea $BP_oP_{\alpha} + P_{\beta}$, donde $P_o$ es la proporción del total del presupuesto total $B$ asignado a $o$. Esto puede causar que los ultimos pares origen-destino considerados en la recursión tengan presupuesto $0$, pues este se asigno completamente a pares origen-destino anteriores en la recursión.
+  Para flexibilizar un poco el presupuesto asignado a cada pulso, se pueden especificar dos numeros $P_{\alpha}$ y $P_{\beta}$ de manera que el presupuesto asignado al par origen destino $o$, sea $BP_oP_{\alpha} + P_{\beta}$, donde $P_o$ es la proporción del total del presupuesto total $B$ asignado a $o$. Esto puede causar que los últimos pares origen-destino considerados en la recursión tengan presupuesto $0$, pues este se asigno completamente a pares origen-destino anteriores en la recursión.
 
   \subsection*{Pulso}
 
@@ -118,14 +118,14 @@
 
   \begin{description}
     \item[Descartar nodos mas lejanos:] Booleano, por defecto falso. Durante la ejecución del pulso, no considera nodos cuya cota mínima de costo sea mayor a la del pulso corriente. Esto puede ser deseado o no dependiendo del conjunto de datos.
-    \item[Delta de descarte de nodos mas lejanos:] Numero, valor de la diferencia a partir del cual se descartan nodos mas lejanos. También puede ser usado para forzar la elecciones de nodos mas cercanos, si se utiliza un valor negativo.
+    \item[Delta de descarte de nodos mas lejanos:] Número, valor de la diferencia a partir del cual se descartan nodos mas lejanos. También puede ser usado para forzar la elecciones de nodos mas cercanos, si se utiliza un valor negativo.
   \end{description}
 
   \section*{Casos de estudio}
 
   En esta sección se comparan los tiempos y las variables obtenidas de la ejecución del solver GLPK\footnote{Gnu Linear Programing Kit} y el Pulse solver. Sobre el último, se detallará para cada caso la configuración utilizada.
 
-  Los MILP solvers son ejecutados con la opcion de utilizar métodos de Cutting-Plane, lo que mejora considerablemente su tiempo de ejecución frente al Branch and Cut.
+  GLPK es ejecutados con la opción de utilizar métodos de Cutting-Plane, lo que mejora considerablemente su tiempo de ejecución frente al Branch and Cut.
 
   \subsection*{Ciudad Vieja}
 
@@ -161,7 +161,7 @@
     \centering
     \begin{tabular}{ccc}
       \toprule
-      Infrastructura & Costo de usario & Costo de construcción \\
+      Infraestructura & Costo de usuario & Costo de construcción \\
       \midrule
       0 (base) & c & 0 \\
       1 & 0.9c & c \\
@@ -172,7 +172,7 @@
     \caption{Resumen de infraestructuras consideradas para Ciudad Vieja.}\label{table:infrasciudadvieja}
   \end{table}
 
-  Utilizando ambos MILP solvers se pudo obtener una solución en poco tiempo. Por otra parte el Pulse solver requirió de muchas pruebas hasta llegar a una configuración que ejecute de manera aceptablemente rápida y encuentre una solución medianamente buena. Si utilizamos la configuración para buscar el mejor camino, entonces el tiempo de ejecución del pulse solver se dispara indefinidamente. Por otra parte se probó un factor de mejora de 0,9 que también resultó en un tiempo de ejecución excesivo, esta vez debido a que no es posible encontrar una solución que mejore en un $10\%$ el camino mas corto de uno de los pares origen-destino ya que su demanda es muy baja y por lo tanto el presupuesto asignado es insuficiente para lograr esta mejora. Luego de varias pruebas, se obtuvo un resultado medianamente bueno en tiempo de ejecución aceptable utilizando un factor de mejora de 0,97 ignorando nodos más lejanos en el pulso, un $P_{\beta}$ en el presupuesto por par origen-destino de $500$, dos caminos por par origen-destino y cuatro iteraciones del solver.
+  Utilizando GLPK se pudo obtener una solución en poco tiempo. Por otra parte el Pulse solver requirió de muchas pruebas hasta llegar a una configuración que ejecute de manera aceptablemente rápida y encuentre una solución medianamente buena. Si utilizamos la configuración para buscar el mejor camino, entonces el tiempo de ejecución del pulse solver se dispara indefinidamente. Por otra parte se probó un factor de mejora de 0,9 que también resultó en un tiempo de ejecución excesivo, esta vez debido a que no es posible encontrar una solución que mejore en un $10\%$ el camino mas corto de uno de los pares origen-destino ya que su demanda es muy baja y por lo tanto el presupuesto asignado es insuficiente para lograr esta mejora. Luego de varias pruebas, se obtuvo un resultado medianamente bueno en tiempo de ejecución aceptable utilizando un factor de mejora de 0,97 ignorando nodos más lejanos en el pulso, un $P_{\beta}$ en el presupuesto por par origen-destino de 500, dos caminos por par origen-destino y cuatro iteraciones del solver.
   
   En la tabla \ref{table:resultadosciudadvieja} se muestra un breve resumen de los tiempos de ejecución y los valores objetivos. Luego en la figura \ref{resultadosciudadvieja} se muestran las decisiones sobre las infraestructuras tomadas por cada solver en el grafo. Se observa en la figura de representación de los resultados que la solución exacta asigna todos los recursos a las dos demandas de mayor valor, que son la que recorre el borde superior y la que recorre los bordes inferior y derecho.
 
@@ -186,7 +186,7 @@
       Pulse & 106,43 & 14995.47 & 942412,85 & \%38 \\
       \bottomrule
     \end{tabular}
-    \caption{Resumen de ejecución para el grafo de Ciudad Vieja.}\label{table:resultadosciudadvieja}
+    \caption{Resumen de ejecución para el grafo de Ciudad Vieja. El porcentaje de mejora, es sobre el valor objetivo en el grafo base.}\label{table:resultadosciudadvieja}
   \end{table}
 
   \begin{figure}[h!]
@@ -240,6 +240,24 @@
 
   La ejecución en GLPK de este caso, no ha finalizado al momento de la escritura de este informe luego de 40 horas de ejecución.
 
+  Para estimar qué tan buena es la solución encontrada, se analizó cuanto sería el valor objetivo si se construyera solo una infraestructura y se aplicara al camino más corto de cada par orgien-destino sobre el grafo base. Por ejemplo para la infraestructura 2, su costo es de 4 por cada unidad de distancia, y su beneficio es 0.5 por cada unidad de costo de usuario (que también es la distancia). Por lo tanto si solo se construye la infraestructura 2 con el presupuesto de 50.000, se pueden construir hasta ${50.000 \over 4} = 12500$ unidades de infraestructura 4. Luego para cada par origen-destino en orden descendente en cantidad de demanda, se ajustará su aporte al valor objetivo si se utilizara la infraestructura 4 en la totalidad del camino o tanto como haya disponible. El resultado para cada infraestructura se encuentra en la tabla \ref{table:montevideoestimacion}. La mejor mejora, valga la redundancia, es casi el doble que la obtenida con el Pulse solver.
+  
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{ccc}
+      \toprule
+      Infraestructura & Valor Objetivo & Mejora \\
+      \midrule
+      1 & 25475315.96 & 10\% \\
+      2 & 16634621,82 & 37,8\% \\
+      3 & 21282121,82 & 24,7\% \\
+      \bottomrule
+    \end{tabular}
+    \caption{Estimación del valor objetivo si se utiliza únicamente la infraestructuras 1, o la 2 o la 3. Notar que la suma de los largos de todos los caminos más cortos de los pares origen-destino suma 22.447, por lo que si se utiliza la infraestructura 1 sobra presupuesto. El porcentaje de mejora, es sobre el valor objetivo en el grafo base.}
+    \label{table:montevideoestimacion}
+  \end{table}
+
+
   \begin{figure}[h!]
     \centering
     \includegraphics[width=10cm]{imgs/mdeo_large_pulse.png}
@@ -249,9 +267,9 @@
 
   \section*{Conclusión}
 
-  Se mostró que el algorítmo del Pulso puede ser aplicado como metaheurístca del problema descrito. Si bien los resultados no fueron los mejores, hay mucho que se puede mejorar ya que esto solo fue una prueba de concepto.
+  Se mostró que el algorítmo del Pulso puede ser aplicado como metaheurístca del problema descrito. Si bien los resultados no fueron los mejores, hay mucho que se puede mejorar ya que esto solo fue una prueba de concepto de su aplicación.
 
-  Hay varios caminos a seguir a partir de aquí. Se puede continuar con la mejora del algorítmo planteado en este trabajo o utilizarlo como pieza de otro sistema. Por ejemplo se podrían mejorar las soluciones de obtenidas por algún mecanismo de búsqueda local.
+  Hay varios caminos a seguir a partir de aquí. Se puede continuar con la mejora del algorítmo planteado en este trabajo o utilizarlo como pieza de otro sistema. Por ejemplo se podrían mejorar las soluciones de obtenidas por algún mecanismo de búsqueda local. En cualquier caso, vale la pena dedicar trabajo a futuras mejoras, algunas de las cuales se describen en la siguiente sección.
 
   \section*{Trabajo futuro}
 
@@ -271,6 +289,12 @@
   
   Por ejemplo se podrían considerar el costo de construcción junto al costo del pulso a insertar en la cola, para calcular el orden de ésta. También se podría estimar el factor de multiplicación del cost bound dependiendo del valor de la restricción de presupuesto, de las infraestructuras disponibles y del costo del camino más corto.
 
+  \subsection*{Incluir otras restricciones}
+
+  El problema original cuenta con una restricción que no se contempló en este trabajo por simplicidad. La restricción es un límite inferior en la cantidad de infraestructuras consecutivas que se pueden construir, a excepción de la infraestructura base. Esto busca prevenir soluciones en las cuales las ciclovías cambian una y otra vez de infraestructura a lo largo de un recorrido.
+
+  Esta restricción es interesante de implementar en el pulso ya que, a diferencia de la del presupuesto, es una restricción cota inferior y debe ser manejada de manera distinta en el chequeo de infactibilidad.
+
   \subsection*{Implementación más rápida}
 
   Para este estudio se utilizó python como lenguaje de implementación, que permite un rápido desarrollo y puesta en funcionamiento pero no es tan bueno en términos de eficiencia en el cómputo. Una implementación en un lenguaje de mas bajo nivel puede lograr mejoras considerables en el tiempo de ejecución.
@@ -285,12 +309,21 @@
 
   \section*{Implementación}
 
-  La implementación de lo descrito en este trabajo se realizó en python y se encuentra accesible públicamente en las referencias \ref{repo}.
+  La implementación de lo descrito en este trabajo se realizó en python y se encuentra accesible públicamente en el repositorio indicado la referencia \ref{repo}.
+
+  Los principales directorios del repositorio son los siguientes:
+
+  \begin{description}
+    \item[/data]: Directorio que contiene los datos utilizados para correr los modelos. Aquí se encuentran los grafos utilizados (.yml), las configuraciones del Pulse solver (.json) y los archivos de datos de GLPK (.dat).
+    \item[/exact]: Directorio que contiene el archivo de definición del modelo de GLPK. 
+    \item[/proj]: Directorio donde se encuentra la implementación del pulso y del Pulse solver. En particular /proj/pulse/algo.py es donde se implementa el pulso. Y /proj/solver/solve.py es donde se implementa el solver.
+  \end{description}
+
+  Para ejecutar el Pulse solver, en la raíz del proyecto, se deben instalar las dependencias de python corriendo el comando pip install -r requirements.txt, luego se corre el pulse solver ejecutando, por ejemplo: ./bin/run instancia.json. Este comando ejecuta el solver utilizando los datos y la configuración especificada por el archivo instancia.json e imprime los resultados intermedios y finales a la salida estándar.
 
   \section*{Referencias}
 
   \begin{enumerate}
-    \item \label{repo} https://github.com/joaquinco/pulse-heuristic
+    \item{ \label{repo} \url{https://github.com/joaquinco/pulse-heuristic}}
   \end{enumerate}
-
 \end{document}
