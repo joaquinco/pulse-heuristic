@@ -230,15 +230,15 @@
 
   Durante la ejecución de este caso, se observó que el pulso tuvo dificultades para encontrar caminos a los nodos destino. Esta dificultad se vió incrementada para los pares origen-destino más lejanos en cantidad de arcos.
 
-  Se observó que la falencia radica en la forma de ordenar la cola de pulsos. Hasta el momento, la cola de pulsos es ordenada por costo proyectado (cost bound en el nodo sumado al costo del pulso). El problema es que el cost bound, resultado de ejecutar el Dijkstra inicial, es demasiado bajo comparado con el costo que termina teniendo el camino, es decir, que no es una buena cota inferior. Esto se debe a que la mejor infraestructura tiene una disminución del costo del $90\%$, (lo que significa que el cost bound de un nodo será de $90\%$ menor que el costo sin infraestructura). Esto causa que el pulso se comporte más como un BFS que DFS. Para contrarrestar esto,se agregó una configuración: un factor que multiplique el cost bound al calcular el costo proyectado.
+  Se observó que la falencia radica en la forma de ordenar la cola de pulsos. Hasta el momento, la cola de pulsos es ordenada por costo proyectado (cost bound en el nodo sumado al costo del pulso). El problema es que el cost bound, resultado de ejecutar el Dijkstra inicial, es demasiado bajo comparado con el costo que termina teniendo el camino, es decir, que no es una buena cota inferior. Esto se debe a que la mejor infraestructura tiene una disminución del costo del $60\%$, (lo que significa que el cost bound de un nodo será de $60\%$ menor que el costo sin infraestructura). Esto causa que el pulso se comporte más como un BFS que DFS. Para contrarrestar esto, se agregó una configuración: un factor que multiplique el cost bound al calcular el costo proyectado.
 
-  Luego de varias pruebas, se determinó que un valor del factor de multiplicación del cost bound de $2.5$ permite obtener resultados en tiempo aceptable para la configuración anteriormente mencionada. Valores menores al mencionado hacían que el tiempo de ejecución se dispare. Debido al corto tiempo de ejecución se pudo aumentar la cantidad de iteraciones a $20$ lo que permitió encontrar una solución un poco mejor.
+  Luego de varias pruebas, se determinó que un valor del factor de multiplicación del cost bound de 2,5 permite obtener resultados en tiempo aceptable para la configuración anteriormente mencionada. Este valor hace que el cost bound sea igual al costo del camino en grafo base. Valores menores al mencionado hacían que el tiempo de ejecución se dispare. Debido al corto tiempo de ejecución se pudo aumentar la cantidad de iteraciones a $20$ lo que permitió encontrar una solución un poco mejor.
   
   Durante las pruebas, diferentes valores de $P_{\beta}$ determinaban para algunos pares origen-destino que la ejecución del pulso diverja o no. Incluso luego de agregar el factor que multiplica el cost bound. Esto se observó en casos en que la asignación de presupuesto era muy baja, lo que causaba que el factor de multiplicación del cost bound sea demasiado bajo para ese caso en particular.
   
   En la figura \ref{resultadosmontevideo} se pueden observar las decisiones tomadas por el Pulse solver. Se observa claramente que las infraestructuras fueron colocadas en uno de los extremos de cada camino, lo cual indica una toma de decisiones que puede ser mejorada. El valor objetivo de esta solución es de 22.865.161,48, un $20\%$ menor que el valor objetivo en el grafo base y se obtuvo en 14 segundos.
 
-  La ejecución en GLPK de este caso, no ha finalizado al momento de la escritura de este informe luego de 40 horas de ejecución.
+  La ejecución en GLPK de este caso, no ha finalizado al momento de la escritura de este informe luego de 72 horas de ejecución.
 
   Para estimar qué tan buena es la solución encontrada, se analizó cuanto sería el valor objetivo si se construyera solo una infraestructura y se aplicara al camino más corto de cada par orgien-destino sobre el grafo base. Por ejemplo para la infraestructura 2, su costo es de 4 por cada unidad de distancia, y su beneficio es 0.5 por cada unidad de costo de usuario (que también es la distancia). Por lo tanto si solo se construye la infraestructura 2 con el presupuesto de 50.000, se pueden construir hasta ${50.000 \over 4} = 12500$ unidades de infraestructura 4. Luego para cada par origen-destino en orden descendente en cantidad de demanda, se ajustará su aporte al valor objetivo si se utilizara la infraestructura 4 en la totalidad del camino o tanto como haya disponible. El resultado para cada infraestructura se encuentra en la tabla \ref{table:montevideoestimacion}. La mejor mejora, valga la redundancia, es casi el doble que la obtenida con el Pulse solver.
   
@@ -281,13 +281,13 @@
 
   \subsection*{Mejorar poda por costo}
 
-  La poda por costo puede ser mejorada de manera que se poden pulsos mas tempranamente. La poda actual solo considera la cota mínima del costo para obtener un costo mínimo proyectado hasta el destino. Sin embargo, este costo mínimo puede que sea inalcanzable debido a que los recursos que requiere no son factibles al sumarlos al pulso que se compara.
+  La poda por costo puede ser mejorada de manera que se poden pulsos mas tempranamente. La poda actual considera el cost bound multiplicado por un factor para obtener un costo proyectado hasta el destino. Sin embargo, el factor de multiplicación debería poder especificarse para cada par origen destino por un argumento similar al punto anterior. Dependiendo del presupuesto asignado, el costo proyectado debería ser mayor o menor.
 
   \subsection*{Mejora en la cola de pulsos}
 
-  En cada iteración del algorítmo del Pulso, el pulso elegido es determinante para una buena y rápida convergencia. En el caso de Montevideo se tuvieron varios problemas en este aspecto lo por lo que un mejor diseño de este aspecto del algorítmo es clave.
+  En cada iteración del algorítmo del Pulso, el pulso elegido es determinante para una buena y rápida convergencia. En el caso de Montevideo se tuvieron varios problemas en este aspecto por lo que un mejor diseño de esta lógica del algorítmo es clave.
   
-  Por ejemplo se podrían considerar el costo de construcción junto al costo del pulso a insertar en la cola, para calcular el orden de ésta. También se podría estimar el factor de multiplicación del cost bound dependiendo del valor de la restricción de presupuesto, de las infraestructuras disponibles y del costo del camino más corto.
+  Por ejemplo se podrían considerar el costo de construcción junto al costo del pulso a insertar en la cola, para calcular el orden de ésta. Relacionado con el punto anterior, también se podría estimar el factor de multiplicación del cost bound dependiendo del valor de la restricción de presupuesto, de las infraestructuras disponibles y del costo del camino más corto.
 
   \subsection*{Incluir otras restricciones}
 
@@ -297,7 +297,7 @@
 
   \subsection*{Implementación más rápida}
 
-  Para este estudio se utilizó python como lenguaje de implementación, que permite un rápido desarrollo y puesta en funcionamiento pero no es tan bueno en términos de eficiencia en el cómputo. Una implementación en un lenguaje de mas bajo nivel puede lograr mejoras considerables en el tiempo de ejecución.
+  Para este estudio se utilizó python como lenguaje de implementación, que permite un desarrollo y puesta en funcionamiento rápidos pero no es tan bueno en términos de eficiencia en el cómputo. Una implementación en un lenguaje de más bajo nivel puede lograr mejoras considerables en el tiempo de ejecución.
 
   \subsection*{Version estocástica}
 
@@ -305,7 +305,7 @@
 
   \subsection*{Versión paralela}
 
-  Se puede analizar la posibilidad de paralelizar el Pulse solver. Por ejemplo correr un pulso sobre una copia del multigrafo inicial, para cada par origen-destino e ir generando un pool de caminos que luego el algorítmo recursivo va aplicando y adaptando según el estado del multigrafo dentro de la recursión.
+  Se puede analizar la posibilidad de paralelizar el Pulse solver. Por ejemplo correr un Pulso sobre una copia del multigrafo inicial para cada par origen-destino e ir generando un pool de caminos que luego el algorítmo recursivo va aplicando y adaptando según el estado del multigrafo dentro de la recursión.
 
   \section*{Implementación}
 
