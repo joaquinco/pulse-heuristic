@@ -86,3 +86,9 @@ In order to run the exact model, you can export a run configuration for the puls
 ```
 
 > This will export graph, demand, infrastrucutres and budget. The conifguration parameters are ignored.
+
+And then run GLPK (recommended with Cutting-Plane option):
+
+```
+glpsol --cuts -m exact/model.mod -d inputfile.dat
+```
