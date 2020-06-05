@@ -42,8 +42,8 @@ class PulseContext(Context):
     else:
       some_edges = self.graph.edges(self.source)
 
-    some_edge = list(some_edges)[0]
-    empty_weights = { k: 0 for k in self.graph.edges[some_edge].keys() }
+    pulse_keys = [self.cost_weight] + list(self.constraints.keys())
+    empty_weights = { k: 0 for k in pulse_keys }
     
     # Pulses over which we'll iterate
     self.pulses = BinaryTree(

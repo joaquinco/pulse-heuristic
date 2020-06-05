@@ -136,4 +136,4 @@ def pulse(*args, **kwargs):
       best_cost = weights.get(weight_key)
       best = pulse, weights
 
-  return [best]
+  return [best] if best else []

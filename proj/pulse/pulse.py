@@ -30,8 +30,8 @@ class Pulse(object):
     ret = Pulse(node, {}, edge=edge)
     ret.prev_path = pulse.prev_path + [edge]
 
-    for key, value in weights.items():
-      ret.weights[key] = pulse.weights[key] + value
+    for key, value in pulse.weights.items():
+      ret.weights[key] = value + weights[key]
 
     return ret
 

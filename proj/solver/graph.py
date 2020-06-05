@@ -12,17 +12,23 @@ def construct_multigraph(graph, infrastructures):
   infras = InfrastructureContext(**infrastructures)
 
   ret = nx.MultiDiGraph()
+  if graph.is_multigraph():
+    edge_view = graph.edges(keys=True)
+  else:
+    edge_view = graph.edges()
 
   for infra_index in range(len(infras.cost_factors) + 1):
-    for edge in graph.edges():
-      n1, n2 = edge
+
+    for edge in edge_view:
+      n1, n2 = edge[:2]
+
       data = dict(graph.edges[edge])
       if infra_index == 0:
         data.update({
           configuration.arc_cost_key: 0
         })
       else:
-        data.update(infras.get_edge_weights(infra_index - 1, edge, data))
+        data.update(infras.get_edge_weights(infra_index - 1, (n1, n2), data))
 
       ret.add_edge(n1, n2, **data)
   
