@@ -36,9 +36,10 @@ class SolverContext(Context):
     )
 
     for od, demand_amount in self.demand.items():
-      paths[od], path_length = astar_path(
+      shortest_path, path_length = astar_path(
         result_graph, *od, configuration.arc_weight_key
       )
+      paths[od] = dict(path=shortest_path, length=path_length)
       ac += demand_amount * path_length
 
     if ac < self.best_solution.value:

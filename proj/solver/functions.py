@@ -1,7 +1,7 @@
 from functools import partial
 import math
 import networkx as nx
-from proj.netowrkx import astar_path as proj_astar_path
+from proj.networkx import astar_path as proj_astar_path
 from proj import configuration
 
 
