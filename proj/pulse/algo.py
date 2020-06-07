@@ -1,10 +1,9 @@
 from functools import partial
-import logging
 
 import networkx as nx
 from .pulse import Pulse
 from .pulse_context import PulseContext
-from proj.config import configuration
+from proj import logger, configuration
 
 
 def _initialize_pulse(
@@ -33,12 +32,12 @@ def _log_stats(context, current=None):
   stats = context.stats()
 
   if current:
-    logging.debug(f'Pulse: current {current}, stack len: {len(context.pulses)}')
+    logger.debug(f'Pulse: current {current}, stack len: {len(context.pulses)}')
 
-  logging.debug(
+  logger.debug(
     'Pruned by cost: {cost_pruned}, dominance: {dominance_pruned}, infeasibility: {inf_pruned}'.format(**stats)
   )
-  logging.debug(
+  logger.debug(
     'Active pulses: {total_pulses}, nodes reached: {nodes_reached}, total nodes: {total_nodes}'.format(**stats)
   )
 

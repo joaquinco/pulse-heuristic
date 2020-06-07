@@ -1,7 +1,6 @@
-import logging
 import networkx as nx
 
-from proj import configuration
+from proj import configuration, logger
 from proj.context import Context
 from proj.cache import cached_property
 from proj.constants import infinite
@@ -43,7 +42,7 @@ class SolverContext(Context):
       ac += demand_amount * path_length
 
     if ac < self.best_solution.value:
-      logging.debug('Best objective {}'.format(ac))
+      logger.debug('Best objective {}'.format(ac))
 
       self.best_solution = Solution(ac, self.modifications, shortest_paths=paths)
 
@@ -67,7 +66,7 @@ class SolverContext(Context):
       ])
 
     ret = {od: percentages[i] for i, od in enumerate(self.odpairs)}
-    logging.debug(f'Budget assignment {ret}')
+    logger.debug(f'Budget assignment {ret}')
 
     return ret
 
@@ -82,7 +81,7 @@ class SolverContext(Context):
     """
     path_weights = {}
 
-    logging.debug('Applying path {} from {}'.format(path, od))
+    logger.debug('Applying path {} from {}'.format(path, od))
 
     for arc in path:
       infra_cost = self.current_graph.edges[arc][configuration.arc_cost_key]
@@ -96,7 +95,7 @@ class SolverContext(Context):
     """
     Dismantle path, meaning that its arcs will have a cost again
     """
-    logging.debug('Disapplying path {} from {}'.format(path, od))
+    logger.debug('Disapplying path {} from {}'.format(path, od))
 
     for arc, infra_cost in self.modifications[od].items():
       self.available_budget += infra_cost
@@ -124,6 +123,6 @@ class SolverContext(Context):
 
     for od in self.demand.keys():
       path, ret[od] = astar_path(self.graph, *od, configuration.arc_weight_key)
-      logging.debug(f'Base shortest path for {od}: {path}')
+      logger.debug(f'Base shortest path for {od}: {path}')
 
     return ret
