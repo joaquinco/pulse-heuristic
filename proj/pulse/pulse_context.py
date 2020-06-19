@@ -8,6 +8,14 @@ from proj.sorted import BinaryTree
 from proj.config import configuration
 from .pulse import Pulse
 
+
+def default_pulse_key_fn(pulse, ctx):
+  """
+  Default pule key is current_cost + projected_cost
+  """
+  return ctx.get_cost_bound(pulse.node) + pulse.weights[ctx.cost_weight]
+
+
 class PulseContext(Context):
   def __init__(
         self,
@@ -17,6 +25,7 @@ class PulseContext(Context):
         graph=None,
         constraints=None,
         best_cost=None,
+        pulse_key_fn=None,
         **kwargs
       ):
     super().__init__(**kwargs)
@@ -33,6 +42,7 @@ class PulseContext(Context):
     self.cost_pruned = 0
     self.dominance_pruned = 0
     self.inf_pruned = 0
+    self.pulse_key_fn = pulse_key_fn or default_pulse_key_fn
 
     self._init_pulses()
 
@@ -56,13 +66,11 @@ class PulseContext(Context):
 
     It's similar to projected weight but multiplies the cost bound by a configured factor.
     """
-    return self.get_cost_bound(pulse.node) * configuration.pulse_queue_key_factor \
-            + pulse.weights[self.cost_weight]
+    return self.pulse_key_fn(pulse, self)
 
   def projected_weight(self, pulse):
     """
-    Key by which pulses are sorted. It will determinate which pulse to consider in
-    each
+    Return lower bound estimation of pulse weight from source to target.
     """
     return self.get_cost_bound(pulse.node) + pulse.weights[self.cost_weight]
 

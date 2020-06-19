@@ -7,12 +7,14 @@ from proj.constants import infinite
 from .solution import Solution
 from .functions import astar_path, astar_path_length, get_zero_weight_subgraph, normalize
 from .graph import construct_multigraph
+from proj import logger
+
 
 class SolverContext(Context):
   def __init__(self, graph, infrastructures, demand, budget, **kwargs):
     self.graph = graph
     self.demand = demand
-    self.infrastructures = infrastructures
+    self.infrastructures = Context(infrastructures)
     self.budget = budget
     self.available_budget = budget
     self.best_solution = Solution(infinite, {})
@@ -126,3 +128,63 @@ class SolverContext(Context):
       logger.debug(f'Base shortest path for {od}: {path}')
 
     return ret
+
+  def pulse_key_fn(self, pulse, ctx):
+    """
+    Returns the key that sorts pulses in pulse algorithm. Meant to override
+    the default
+    """
+    if configuration.solver_pulse_key_approach == 'naive':
+      return pulse.weights[ctx.cost_weight] + ctx.get_cost_bound(pulse.node)
+
+    bp = ctx.constraints['construction_cost'] - pulse.weights['construction_cost']
+    bp_factor = pulse.weights['construction_cost'] / ctx.constraints['construction_cost']
+    qp, ip = self.agg_infra_factors
+    lp = bp / qp
+    cp = ctx.get_cost_bound(pulse.node) / self.min_infra_cost
+
+    projected_cost = cp - lp + lp * ip * qp
+  
+    return (pulse.weights[ctx.cost_weight] + projected_cost) * (1 + bp_factor)
+
+  @cached_property
+  def agg_infra_factors(self):
+    """
+    Return (construction_cost_factor, cost_factor) used to estimate projected cost of pulse
+    """
+    if configuration.solver_pulse_key_approach == 'max_cost':
+      qp = max(self.infrastructures.construction_cost_factors)
+      ip = min(self.infrastructures.cost_factors)
+    elif configuration.solver_pulse_key_approach == 'min_cost':
+      qp = max(self.infrastructures.construction_cost_factors)
+      ip = min(self.infrastructures.cost_factors)
+    elif configuration.solver_pulse_key_approach == 'avg_cost':
+      qp = sum(self.infrastructures.construction_cost_factors) / len(self.infrastructures.construction_cost_factors)
+      ip = sum(self.infrastructures.cost_factors) / len(self.infrastructures.cost_factors)
+    else:
+      indexes = range(len(self.infrastructures.cost_factors))
+      utility_fn = lambda i: self.infrastructures.cost_factors[i] / self.infrastructures.construction_cost_factors[i]
+
+      if configuration.solver_pulse_key_approach == 'avg_utility':
+        index = sorted(indexes, key=utility_fn)[int(len(indexes) / 2)]
+      else:
+        fun = max if configuration.solver_pulse_key_approach == 'max_utility' else min
+        index = fun(indexes, key=utility_fn)
+
+      qp = self.infrastructures.cost_factors[index]
+      ip = self.infrastructures.construction_cost_factors[index]
+
+    return qp, ip
+
+  @cached_property
+  def agg_cost_factor(self):
+    """
+    Returns cost factor, used to estimate projected cost of pulse
+    """
+
+  @cached_property
+  def min_infra_cost(self):
+    """
+    Returns minimun infra cost
+    """
+    return min(self.infrastructures.cost_factors)

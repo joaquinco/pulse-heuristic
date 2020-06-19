@@ -40,7 +40,7 @@ def run_solve_search(ctx, od_index):
   paths = pulse(
     ctx.current_graph, source, target,
     weight=configuration.arc_weight_key, constraints=constraints,
-    primal_bound=primal_bound
+    primal_bound=primal_bound, pulse_key_fn=ctx.pulse_key_fn
   )
 
   found = False

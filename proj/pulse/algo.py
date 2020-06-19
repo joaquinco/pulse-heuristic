@@ -6,25 +6,6 @@ from .pulse_context import PulseContext
 from proj import logger, configuration
 
 
-def _initialize_pulse(
-  graph, source, target, weight, constraints=None, primal_bound=None):
-  """
-  Initialization phase of pulse algorithm
-  """
-  constraints = constraints or {}
-
-  context = PulseContext(
-    source=source,
-    target=target,
-    weight=weight,
-    graph=graph,
-    best_cost=primal_bound,
-    constraints=constraints,
-  )
-
-  return context
-
-
 def _log_stats(context, current=None):
   """
   Log pulse stats
@@ -41,7 +22,13 @@ def _log_stats(context, current=None):
     'Active pulses: {total_pulses}, nodes reached: {nodes_reached}, total nodes: {total_nodes}'.format(**stats)
   )
 
-def _pulse(graph, *args, **kwargs):
+
+def _pulse(
+  graph, source, target, weight,
+  constraints=None,
+  primal_bound=None,
+  pulse_key_fn=None
+):
   """
   Compute shortest path using pulse algorithm
 
@@ -52,6 +39,7 @@ def _pulse(graph, *args, **kwargs):
     weight: edge weight to minimize
     constraints: dict of constraints, default None
     primal_bound: path cost between source and target used to bound branches.
+    pulse_key_fn: callable that returns the sorting key of pulses
 
   Returns:
     generator that yields path, path_weights
@@ -59,10 +47,17 @@ def _pulse(graph, *args, **kwargs):
   if not graph:
     raise Exception('Graph is empty')
 
-  context = _initialize_pulse(graph, *args, **kwargs)
+  context = PulseContext(
+    source=source,
+    target=target,
+    weight=weight,
+    graph=graph,
+    best_cost=primal_bound,
+    constraints=constraints or {},
+    pulse_key_fn=pulse_key_fn,
+  )
 
   iteration = 0
-
   while True:
     current = context.pop_pulse()
 
@@ -125,14 +120,22 @@ def pulse(*args, **kwargs):
 
   pulses_generator = _pulse(*args, **kwargs)
 
-  if not configuration.pulse_return_best:
-    return pulses_generator
-
   best = None
   best_cost = None
+
+  iter = 0
   for pulse, weights in pulses_generator:
+    iter += 1
+
+    # Update local best
     if best is None or best_cost > weights.get(weight_key):
       best_cost = weights.get(weight_key)
       best = pulse, weights
 
-  return [best] if best else []
+    if not configuration.pulse_return_best and iter % configuration.pulse_return_best_every == 0:
+      yield best
+      best = best_cost = None
+
+  if best:
+    yield best
+

@@ -29,7 +29,7 @@ def main():
   update_configuration(**data.config)
 
   arguments = [data.graph, data.infrastructures, data.demand, data.budget]
-  print(data.graph)
+
   if args.action in ['export']:
     export(sys.stdout, *arguments)
   else:
