@@ -71,6 +71,9 @@ class Configuration(object):
   def update(self, **kwargs):
     self.values.update(kwargs)
 
+  def as_dict(self):
+    return dict(self.values)
+
   def _setup_attributes(self):
     for k in self.values.keys():
       setattr(self.__class__, k, ConfigDescriptor(k))

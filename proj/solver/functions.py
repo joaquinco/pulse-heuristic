@@ -3,17 +3,14 @@ import math
 import networkx as nx
 from proj.networkx import astar_path as proj_astar_path
 from proj import configuration
-
+from proj.geo import plane_distance
 
 def astar_heuristic(graph, u, v):
   """
   Heuristic is the euclidean distance between nodes
   """
-  x1, y1 = graph.nodes[u][configuration.node_location_key]
-  x2, y2 = graph.nodes[v][configuration.node_location_key]
-
-  return configuration.astar_heuristic_factor * math.sqrt(
-    (x1 - x2) ** 2 + (y1 - y2) ** 2
+  return configuration.astar_heuristic_factor * plane_distance(
+    graph, u, v, key=configuration.node_location_key
   )
 
 

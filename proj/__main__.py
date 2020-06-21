@@ -42,7 +42,7 @@ def main():
   budget: {data.budget}
   nodes: {data.graph.number_of_nodes()}
   edges: {data.graph.number_of_edges()}
-  config: \n{pp.pformat(configuration, indent=4)}
+  config: \n{pp.pformat(configuration.as_dict(), indent=4)}
       """
     )
     solution = solve(*arguments)
