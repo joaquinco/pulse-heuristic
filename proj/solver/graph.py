@@ -18,7 +18,6 @@ def construct_multigraph(graph, infrastructures):
     edge_view = graph.edges()
 
   for infra_index in range(len(infras.cost_factors) + 1):
-
     for edge in edge_view:
       n1, n2 = edge[:2]
 
@@ -32,6 +31,8 @@ def construct_multigraph(graph, infrastructures):
 
       ret.add_edge(n1, n2, **data)
   
+  nx.set_node_attributes(ret, dict(graph.nodes.data()))
+
   return ret
 
 
