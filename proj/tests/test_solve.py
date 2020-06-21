@@ -23,6 +23,7 @@ class SolveTestCase(unittest.TestCase):
     self.budget = 30
 
     configuration.arc_weight_key = 'cost'
+    configuration.use_astar_heuristic = False
     configuration.max_iter = 1
     configuration.pulse_primal_bound_factor = 0.95
 

@@ -1,5 +1,3 @@
-from .context import Context
-
 defaults = dict(
   # If use astar heuristic to compute objective function
   use_astar_heuristic=True,
@@ -51,17 +49,39 @@ defaults = dict(
   seed=129,
 )
 
-class Config(Context):
+class ConfigDescriptor(object):
+  def __init__(self, name):
+    self.name = name
+
+  def __get__(self, instance, owner):
+    if instance:
+      return instance.values.get(self.name)
+
+  def __set__(self, instance, value):
+    instance.update(**{ self.name: value })
+
+
+class Configuration(object):
   def __init__(self, **kwargs):
-    super().__init__(**{**defaults, **kwargs})
+    self.values = {}
+    self.update(**{**defaults, **kwargs})
+
+    self._setup_attributes()
+
+  def update(self, **kwargs):
+    self.values.update(kwargs)
+
+  def _setup_attributes(self):
+    for k in self.values.keys():
+      setattr(self.__class__, k, ConfigDescriptor(k))
 
 
-configuration = Config()
+configuration = Configuration()
 
 def reset():
   global configuration
 
-  configuration = Config()
+  configuration.update(**defaults)
 
 def update_configuration(**kwargs):
   global configuration

@@ -21,7 +21,7 @@ def get_heuristic(graph):
   """
   Returns the astar heuristic function if enabled
   """
-  if configuration.astar_heuristic_enabled:
+  if configuration.use_astar_heuristic:
     return partial(astar_heuristic, graph)
   return None
 
