@@ -9,7 +9,6 @@ from .functions import astar_path, astar_path_length, get_zero_weight_subgraph, 
 from .graph import construct_multigraph
 from proj import logger
 
-
 class SolverContext(Context):
   def __init__(self, graph, infrastructures, demand, budget, **kwargs):
     self.graph = graph
@@ -140,12 +139,12 @@ class SolverContext(Context):
     bp = ctx.constraints['construction_cost'] - pulse.weights['construction_cost']
     bp_factor = pulse.weights['construction_cost'] / ctx.constraints['construction_cost']
     qp, ip = self.agg_infra_factors
-    lp = bp / qp
     cp = ctx.get_cost_bound(pulse.node) / self.min_infra_cost
+    lp = min(bp / qp, cp)
 
-    projected_cost = cp - lp + lp * ip * qp
-  
-    return (pulse.weights[ctx.cost_weight] + projected_cost) * (1 + bp_factor)
+    projected_cost = cp - lp + lp * ip
+
+    return pulse.weights[ctx.cost_weight] + projected_cost
 
   @cached_property
   def agg_infra_factors(self):
@@ -156,8 +155,8 @@ class SolverContext(Context):
       qp = max(self.infrastructures.construction_cost_factors)
       ip = min(self.infrastructures.cost_factors)
     elif configuration.solver_pulse_key_approach == 'min_cost':
-      qp = max(self.infrastructures.construction_cost_factors)
-      ip = min(self.infrastructures.cost_factors)
+      qp = min(self.infrastructures.construction_cost_factors)
+      ip = max(self.infrastructures.cost_factors)
     elif configuration.solver_pulse_key_approach == 'avg_cost':
       qp = sum(self.infrastructures.construction_cost_factors) / len(self.infrastructures.construction_cost_factors)
       ip = sum(self.infrastructures.cost_factors) / len(self.infrastructures.cost_factors)
@@ -171,8 +170,8 @@ class SolverContext(Context):
         fun = max if configuration.solver_pulse_key_approach == 'max_utility' else min
         index = fun(indexes, key=utility_fn)
 
-      qp = self.infrastructures.cost_factors[index]
-      ip = self.infrastructures.construction_cost_factors[index]
+      qp = self.infrastructures.construction_cost_factors[index]
+      ip = self.infrastructures.cost_factors[index]
 
     return qp, ip
 
